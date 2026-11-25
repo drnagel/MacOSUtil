@@ -22,7 +22,16 @@ enum SelfTest {
         do { catalog = try Catalog.load(from: dir) } catch {
             print("  ✗ \(error.localizedDescription)"); return false
         }
-        check(true, "\(catalog.categories.count) categorías, \(catalog.allTweaks.count) ajustes (\(dir.path))")
+        let linkCount = catalog.categories.reduce(0) { $0 + $1.links.count }
+        check(true, "\(catalog.categories.count) categorías, \(catalog.allTweaks.count) ajustes, \(linkCount) enlaces a Ajustes (\(dir.path))")
+        // Un enlace que no sea de Ajustes del Sistema debe rechazarse.
+        let bad = #"{"id":"x","title":"x","icon":"x","order":1,"links":[{"id":"x.a","title":"a","description":"","url":"https://example.com"}]}"#
+        if let cat = try? JSONDecoder().decode(TweakCategory.self, from: Data(bad.utf8)) {
+            let problems = Catalog(categories: [cat], source: dir).validate()
+            check(problems.contains { $0.contains("solo se permiten") }, "rechaza enlaces que no son de Ajustes del Sistema")
+        } else {
+            check(false, "no se pudo decodificar la categoría de prueba")
+        }
 
         // 2. Estado actual (solo lectura)
         print("== Estado en este Mac (solo lectura)")

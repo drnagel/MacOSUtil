@@ -8,6 +8,36 @@ public struct TweakCategory: Codable, Identifiable, Hashable, Sendable {
     public let icon: String
     public let order: Int
     public var tweaks: [Tweak]
+    /// Opciones que macOS no deja cambiar por terminal: se abre el panel exacto de Ajustes del Sistema.
+    public var links: [SettingsPaneLink]
+
+    enum CodingKeys: String, CodingKey { case id, title, icon, order, tweaks, links }
+
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        icon = try c.decode(String.self, forKey: .icon)
+        order = try c.decode(Int.self, forKey: .order)
+        tweaks = try c.decodeIfPresent([Tweak].self, forKey: .tweaks) ?? []
+        links = try c.decodeIfPresent([SettingsPaneLink].self, forKey: .links) ?? []
+    }
+}
+
+/// Enlace a un panel de Ajustes del Sistema (`x-apple.systempreferences:<panel>?<ancla>`).
+public struct SettingsPaneLink: Codable, Identifiable, Hashable, Sendable {
+    public let id: String
+    public let title: String
+    public let description: String
+    public let url: String
+
+    public static let scheme = "x-apple.systempreferences"
+
+    /// Solo se aceptan URLs de Ajustes del Sistema: el catálogo no puede abrir nada más.
+    public var settingsURL: URL? {
+        guard url.hasPrefix(Self.scheme + ":"), let u = URL(string: url) else { return nil }
+        return u
+    }
 }
 
 public enum Risk: String, Codable, Sendable, Comparable {

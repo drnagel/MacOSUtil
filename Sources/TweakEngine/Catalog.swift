@@ -5,6 +5,11 @@ public struct Catalog: Sendable {
     public let categories: [TweakCategory]
     public let source: URL
 
+    public init(categories: [TweakCategory], source: URL) {
+        self.categories = categories
+        self.source = source
+    }
+
     public var allTweaks: [Tweak] { categories.flatMap(\.tweaks) }
 
     public func tweak(_ id: String) -> Tweak? { allTweaks.first { $0.id == id } }
@@ -52,7 +57,12 @@ public struct Catalog: Sendable {
         var ids: Set<String> = []
         var slots: [String: String] = [:]
         for c in categories {
-            if c.tweaks.isEmpty { problems.append("\(c.id): categoría vacía") }
+            if c.tweaks.isEmpty && c.links.isEmpty { problems.append("\(c.id): categoría vacía") }
+            for l in c.links {
+                if !ids.insert(l.id).inserted { problems.append("\(l.id): id repetido") }
+                if !l.id.hasPrefix(c.id + ".") { problems.append("\(l.id): el id debe empezar por «\(c.id).»") }
+                if l.settingsURL == nil { problems.append("\(l.id): solo se permiten URLs \(SettingsPaneLink.scheme):") }
+            }
             for t in c.tweaks {
                 if !ids.insert(t.id).inserted { problems.append("\(t.id): id repetido") }
                 if !t.id.hasPrefix(c.id + ".") { problems.append("\(t.id): el id debe empezar por «\(c.id).»") }

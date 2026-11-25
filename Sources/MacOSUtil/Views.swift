@@ -69,7 +69,7 @@ struct Sidebar: View {
             }
             Section("Sistema") {
                 Label("Apps", systemImage: "square.grid.2x2")
-                    .badge(app.apps.statuses.isEmpty ? Text("") : Text("\(app.apps.installedCount)"))
+                    .badge(app.apps.installedCount)   // 0 (o aún sin consultar) no muestra contador
                     .tag(SidebarItem.apps)
                 Label("Espacio en disco", systemImage: "internaldrive").tag(SidebarItem.disk)
             }
@@ -83,14 +83,47 @@ struct CategoryView: View {
 
     var body: some View {
         Form {
-            Section {
-                ForEach(category.tweaks) { TweakRow(tweak: $0) }
-            } header: {
-                Text("\(app.onCount(category)) de \(category.tweaks.count) activados")
+            if !category.tweaks.isEmpty {
+                Section {
+                    ForEach(category.tweaks) { TweakRow(tweak: $0) }
+                } header: {
+                    Text("\(app.onCount(category)) de \(category.tweaks.count) activados")
+                }
+            }
+            if !category.links.isEmpty {
+                Section {
+                    ForEach(category.links) { SettingsLinkRow(link: $0) }
+                } header: {
+                    Text("Se cambian en Ajustes del Sistema")
+                } footer: {
+                    Text("macOS no deja cambiar estas opciones desde otras apps. El botón abre el panel exacto.")
+                }
             }
         }
         .formStyle(.grouped)
         .navigationTitle(category.title)
+    }
+}
+
+struct SettingsLinkRow: View {
+    let link: SettingsPaneLink
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(link.title)
+                Text(link.description).font(.callout).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            Button {
+                if let url = link.settingsURL { NSWorkspace.shared.open(url) }
+            } label: {
+                Label("Abrir", systemImage: "arrow.up.forward.app")
+            }
+            .controlSize(.small)
+            .disabled(link.settingsURL == nil)
+        }
+        .padding(.vertical, 3)
     }
 }
 
