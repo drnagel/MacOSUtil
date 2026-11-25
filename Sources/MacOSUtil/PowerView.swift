@@ -163,9 +163,6 @@ struct PowerView: View {
         } message: {
             Text("Vuelven a los valores que tenían antes de cambiarlos con MacOSUtil. macOS pedirá tu contraseña.")
         }
-        .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
-        }
     }
 }
 
@@ -300,9 +297,6 @@ struct SpotlightSection: View {
             Text(v.path == "/"
                  ? L("Es el disco de arranque: la búsqueda de Spotlight, de Mail y de muchas apps dejará de funcionar bien.")
                  : L("Spotlight dejará de buscar en este disco. Puedes volver a activarla cuando quieras."))
-        }
-        .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
     }
 }

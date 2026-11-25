@@ -3,6 +3,7 @@ name: Catalog
 # Every pull request that touches the catalog is validated before review:
 # structure, unique ids, settings links, profile references and EN/ES translations.
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "Catalog/**"

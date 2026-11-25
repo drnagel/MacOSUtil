@@ -69,8 +69,8 @@ struct RootView: View {
                 app.openWizard()
             }
         }
-        .alert(item: $app.banner) { b in
-            Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
+        .alert(item: Binding(get: { app.currentBanner }, set: { if $0 == nil { app.dismissBanner() } })) { b in
+            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
     }
 }
@@ -277,10 +277,10 @@ struct PendingBar: View {
 
 /// Espacio en disco: un resumen y el acceso a DiskTree, que es quien analiza y limpia.
 struct DiskView: View {
+    @Environment(AppModel.self) private var app
     @State private var volume = VolumeInfo.current()
     @State private var diskTree = DiskTreeLink.appURL
     @State private var links = DiskTreeLink.supportsLinks()
-    @State private var spotlight = SpotlightModel()
 
     private static let shortcuts: [(title: String, detail: String, icon: String, tab: String)] = [
         (L("Qué ocupa espacio"), L("Los archivos más grandes del Mac"), "doc.badge.ellipsis", "large"),
@@ -309,7 +309,7 @@ struct DiskView: View {
                 ProgressView(value: volume.usedFraction)
                     .tint(volume.usedFraction > 0.9 ? .red : .accentColor)
             }
-            SpotlightSection(model: spotlight)
+            SpotlightSection(model: app.spotlight)
             if diskTree == nil {
                 Section("Analizar y liberar espacio") {
                     Text("DiskTree no está instalada.")

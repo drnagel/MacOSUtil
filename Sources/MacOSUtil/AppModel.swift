@@ -23,6 +23,7 @@ final class AppModel {
     let apps = AppsModel()
     let startup = StartupModel()
     let power = PowerModel()
+    let spotlight = SpotlightModel()
     let health = HealthModel()
     private(set) var catalog: Catalog?
     private(set) var loadError: String?
@@ -37,6 +38,18 @@ final class AppModel {
     private(set) var profileError: String?
     /// Asistente abierto (nil = cerrado).
     var wizard: WizardModel?
+
+    /// El aviso pendiente, venga de la sección que venga. Se presenta en un solo sitio (la ventana principal):
+    /// si cada sección tuviera su propio `.alert`, el de la sección visible taparía los demás.
+    var currentBanner: Banner? { banner ?? apps.banner ?? startup.banner ?? power.banner ?? spotlight.banner }
+
+    func dismissBanner() {
+        if banner != nil { banner = nil }
+        else if apps.banner != nil { apps.banner = nil }
+        else if startup.banner != nil { startup.banner = nil }
+        else if power.banner != nil { power.banner = nil }
+        else { spotlight.banner = nil }
+    }
 
     struct Banner: Identifiable {
         let id = UUID()

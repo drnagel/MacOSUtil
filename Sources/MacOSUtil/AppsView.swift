@@ -62,9 +62,6 @@ struct AppsView: View {
         }
         .safeAreaInset(edge: .bottom) { AppsBar() }
         .sheet(isPresented: $model.showLog) { LogSheet() }
-        .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
-        }
         .onAppear { if model.statuses.isEmpty { model.refresh() } }
         .confirmationDialog("¿Pasar \(model.adoptable.count) apps a Homebrew?", isPresented: $confirmAdoptAll) {
             Button("Pasar \(model.adoptable.count) a Homebrew") { model.adopt(model.adoptable) }

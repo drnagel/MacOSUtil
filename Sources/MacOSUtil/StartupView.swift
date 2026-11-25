@@ -136,9 +136,6 @@ struct StartupView: View {
             Text(L("Los servicios que desactivó MacOSUtil vuelven a arrancar ahora y al iniciar sesión.")
                  + (model.controller.records.contains { $0.scope.needsAdmin } ? " " + L("Para los del sistema, macOS pedirá tu contraseña una vez.") : ""))
         }
-        .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
-        }
     }
 }
 
