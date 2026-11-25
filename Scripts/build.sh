@@ -20,6 +20,13 @@ cp "$BIN" "$APP/Contents/MacOS/${APP_NAME}"
 # El catálogo viaja dentro de la app; el motor lo busca en Contents/Resources/Catalog.
 cp -R Catalog "$APP/Contents/Resources/Catalog"
 
+# Icono: se regenera con Scripts/make_icon.sh si falta o si cambió el dibujo.
+if [[ ! -f Resources/AppIcon.icns || Scripts/make_icon.swift -nt Resources/AppIcon.icns ]]; then
+  echo "→ Generando icono"
+  Scripts/make_icon.sh
+fi
+cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -32,6 +39,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>${VERSION}</string>
   <key>CFBundleVersion</key><string>$(date +%Y%m%d%H%M)</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundleDevelopmentRegion</key><string>es</string>
   <key>LSMinimumSystemVersion</key><string>15.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
@@ -69,5 +77,7 @@ fi
 
 if [[ " $* " == *" --run "* ]]; then
   pkill -x "$APP_NAME" 2>/dev/null || true
+  # Esperar a que la instancia anterior termine; si no, open falla con el error -600.
+  for _ in {1..20}; do pgrep -x "$APP_NAME" >/dev/null || break; sleep 0.1; done
   open "$APP"
 fi
