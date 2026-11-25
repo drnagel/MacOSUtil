@@ -5,3 +5,6 @@ build/
 
 # Claves de firma: nunca en el repo
 *.key
+
+# Plan de trabajo: solo en local
+PLAN.md
