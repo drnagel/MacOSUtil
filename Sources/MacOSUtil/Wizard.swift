@@ -162,11 +162,11 @@ struct WizardView: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            Image(systemName: "wand.and.stars").font(.title2).foregroundStyle(Color.accentColor)
+            Image(systemName: "wand.and.stars").font(.uiTitle2).foregroundStyle(Color.accentColor)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Asistente de configuración").font(.headline)
+                Text("Asistente de configuración").font(.uiHeadline)
                 Text(model.step == .profile ? "Elige un punto de partida" : model.sourceTitle)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.uiCallout).foregroundStyle(.secondary)
             }
             Spacer()
             HStack(spacing: 6) {
@@ -174,7 +174,7 @@ struct WizardView: View {
                     let current = model.step == s || (s == .applying && model.step == .done)
                     let passed = model.step > s
                     Text(s.title)
-                        .font(.caption.weight(current ? .semibold : .regular))
+                        .font(.uiCaption.weight(current ? .semibold : .regular))
                         .padding(.horizontal, 8).padding(.vertical, 3)
                         .background(current ? Color.accentColor.opacity(0.2) : .clear, in: Capsule())
                         .foregroundStyle(current ? Color.accentColor : (passed ? .primary : .secondary))
@@ -220,9 +220,9 @@ private struct ProfileStep: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Cada perfil marca un conjunto de ajustes y apps. En los siguientes pasos puedes quitar o añadir lo que quieras; nada se aplica hasta el resumen.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.uiCallout).foregroundStyle(.secondary)
                 if let error = model.root.profileError {
-                    Text(error).foregroundStyle(.red).font(.callout)
+                    Text(error).foregroundStyle(.red).font(.uiCallout)
                 }
                 // Grid (no LazyVGrid) para que las dos tarjetas de cada fila tengan la misma altura.
                 Grid(horizontalSpacing: 12, verticalSpacing: 12) {
@@ -243,12 +243,12 @@ private struct ProfileStep: View {
         Button { model.choose(p) } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Image(systemName: p.icon).font(.title3).foregroundStyle(Color.accentColor).frame(width: 26)
-                    Text(p.title).font(.headline)
+                    Image(systemName: p.icon).font(.uiTitle3).foregroundStyle(Color.accentColor).frame(width: 26)
+                    Text(p.title).font(.uiHeadline)
                     Spacer()
-                    Text("\(p.tweaks.count) ajustes · \(p.apps.count) apps").font(.caption).foregroundStyle(.tertiary)
+                    Text("\(p.tweaks.count) ajustes · \(p.apps.count) apps").font(.uiCaption).foregroundStyle(.tertiary)
                 }
-                Text(p.description).font(.callout).foregroundStyle(.secondary)
+                Text(p.description).font(.uiCallout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(12)
@@ -266,11 +266,11 @@ private struct TweakStep: View {
     var body: some View {
         Form {
             if let notice = model.notice {
-                Section { Label(notice, systemImage: "info.circle").font(.callout) }
+                Section { Label(notice, systemImage: "info.circle").font(.uiCallout) }
             }
             Section {
                 Text("Marca lo que quieras activar. Lo que ya está activado en este Mac aparece marcado y no se toca. El asistente solo activa: para desactivar algo, usa la sección de ajustes.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.uiCallout).foregroundStyle(.secondary)
             }
             ForEach(model.root.catalog?.categories ?? []) { c in
                 if !c.tweaks.isEmpty {
@@ -349,39 +349,39 @@ private struct SummaryStep: View {
                 if model.tweaksToApply.isEmpty {
                     Text("No hay ajustes nuevos que activar.").foregroundStyle(.secondary)
                 } else {
-                    Text("Se activarán \(model.tweaksToApply.count):").font(.callout)
-                    Text(model.tweaksToApply.map(\.title).joined(separator: " · ")).font(.callout).foregroundStyle(.secondary)
+                    Text("Se activarán \(model.tweaksToApply.count):").font(.uiCallout)
+                    Text(model.tweaksToApply.map(\.title).joined(separator: " · ")).font(.uiCallout).foregroundStyle(.secondary)
                 }
                 if model.tweaksAlreadyOn > 0 {
-                    Text("\(model.tweaksAlreadyOn) ya estaban activados.").font(.caption).foregroundStyle(.secondary)
+                    Text("\(model.tweaksAlreadyOn) ya estaban activados.").font(.uiCaption).foregroundStyle(.secondary)
                 }
                 if !model.restarts.isEmpty {
                     Label("Se reiniciarán \(model.restarts.joined(separator: ", ")) (un parpadeo de un segundo).", systemImage: "arrow.clockwise")
-                        .font(.callout)
+                        .font(.uiCallout)
                 }
                 if model.needsLogout {
                     Label("Algunos cambios se notarán del todo al cerrar sesión o reabrir las apps.", systemImage: "person.crop.circle.badge.clock")
-                        .font(.callout)
+                        .font(.uiCallout)
                 }
             }
             Section("Apps") {
                 if model.appsToInstall.isEmpty {
                     Text("No hay apps nuevas que instalar.").foregroundStyle(.secondary)
                 } else {
-                    Text("Se instalarán \(model.appsToInstall.count) con Homebrew:").font(.callout)
-                    Text(model.appsToInstall.map(\.name).joined(separator: " · ")).font(.callout).foregroundStyle(.secondary)
+                    Text("Se instalarán \(model.appsToInstall.count) con Homebrew:").font(.uiCallout)
+                    Text(model.appsToInstall.map(\.name).joined(separator: " · ")).font(.uiCallout).foregroundStyle(.secondary)
                 }
                 if model.appsAlreadyInstalled > 0 {
-                    Text("\(model.appsAlreadyInstalled) ya estaban instaladas.").font(.caption).foregroundStyle(.secondary)
+                    Text("\(model.appsAlreadyInstalled) ya estaban instaladas.").font(.uiCaption).foregroundStyle(.secondary)
                 }
                 if !model.appsNeedingPassword.isEmpty {
                     Label("\(model.appsNeedingPassword.map(\.name).joined(separator: ", ")) se instala en Terminal porque pide tu contraseña.",
-                          systemImage: "lock").font(.callout)
+                          systemImage: "lock").font(.uiCallout)
                 }
             }
             Section {
                 Text("Todo lo que se active se puede deshacer con «Restaurar todo». La configuración elegida se guarda para poder reaplicarla después de una actualización de macOS.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.uiCaption).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
@@ -399,7 +399,7 @@ private struct ApplyingStep: View {
                 Text("Aplicando ajustes…")
             } else {
                 Text(apps.currentTask ?? "Preparando apps…")
-                Text(apps.log.last ?? "").font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary)
+                Text(apps.log.last ?? "").font(.uiMono).foregroundStyle(.secondary)
                     .lineLimit(1).truncationMode(.middle).frame(maxWidth: 600)
             }
         }
@@ -418,22 +418,22 @@ private struct DoneStep: View {
             Section {
                 Label(hadErrors ? "Terminado con algunos problemas" : "Configuración aplicada",
                       systemImage: hadErrors ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                    .font(.title3).foregroundStyle(hadErrors ? .orange : .green)
+                    .font(.uiTitle3).foregroundStyle(hadErrors ? .orange : .green)
             }
             Section("Ajustes") {
                 Text(tr.changed.count == 1 ? "1 ajuste activado." : "\(tr.changed.count) ajustes activados.")
-                ForEach(tr.failed, id: \.id) { f in Text("✗ \(f.error)").foregroundStyle(.red).font(.callout) }
-                if !tr.restarted.isEmpty { Text("Reiniciado: \(tr.restarted.joined(separator: ", ")).").font(.callout).foregroundStyle(.secondary) }
-                if tr.needsLogout { Text("Cierra sesión cuando puedas para que todos los cambios se apliquen del todo.").font(.callout) }
+                ForEach(tr.failed, id: \.id) { f in Text("✗ \(f.error)").foregroundStyle(.red).font(.uiCallout) }
+                if !tr.restarted.isEmpty { Text("Reiniciado: \(tr.restarted.joined(separator: ", ")).").font(.uiCallout).foregroundStyle(.secondary) }
+                if tr.needsLogout { Text("Cierra sesión cuando puedas para que todos los cambios se apliquen del todo.").font(.uiCallout) }
             }
             Section("Apps") {
                 Text(ao.installed.isEmpty ? "No se instaló ninguna app." : "Instaladas: \(ao.installed.joined(separator: ", ")).")
                 if !ao.failed.isEmpty {
-                    Text("Con error: \(ao.failed.joined(separator: ", ")). Mira el registro en la sección Apps.").foregroundStyle(.red).font(.callout)
+                    Text("Con error: \(ao.failed.joined(separator: ", ")). Mira el registro en la sección Apps.").foregroundStyle(.red).font(.uiCallout)
                 }
                 if !ao.inTerminal.isEmpty {
                     Text("En Terminal (pide contraseña): \(ao.inTerminal.joined(separator: ", ")). Cuando termine, pulsa «Volver a comprobar».")
-                        .font(.callout)
+                        .font(.uiCallout)
                 }
             }
         }

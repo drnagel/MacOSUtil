@@ -33,6 +33,7 @@ struct RootView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) { PendingBar() }
+            .font(.uiBody)
         }
         .toolbar {
             ToolbarItem {
@@ -56,7 +57,7 @@ struct RootView: View {
         } message: {
             Text("Cada ajuste que cambió MacOSUtil vuelve al valor que tenía antes.")
         }
-        .sheet(item: $app.wizard) { WizardView(model: $0) }
+        .sheet(item: $app.wizard) { WizardView(model: $0).font(.uiBody) }
         .onAppear {
             // La primera vez que se abre la app, se ofrece el asistente.
             if !UserDefaults.standard.bool(forKey: "wizardOffered") {
@@ -132,7 +133,7 @@ struct SettingsLinkRow: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(link.title)
-                Text(link.description).font(.callout).foregroundStyle(.secondary)
+                Text(link.description).font(.uiCallout).foregroundStyle(.secondary)
             }
             Spacer(minLength: 8)
             Button {
@@ -166,9 +167,9 @@ struct TweakRow: View {
                         if tweak.logout { Tag(text: "Cerrar sesión", color: .secondary) }
                         if app.engine.isManaged(tweak) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
                     }
-                    Text(tweak.description).font(.callout).foregroundStyle(.secondary)
+                    Text(tweak.description).font(.uiCallout).foregroundStyle(.secondary)
                     if case .unavailable(let why) = status {
-                        Text(why).font(.caption).foregroundStyle(.orange)
+                        Text(why).font(.uiCaption).foregroundStyle(.orange)
                     }
                 }
             }
@@ -179,7 +180,7 @@ struct TweakRow: View {
                 withAnimation(.snappy(duration: 0.15)) { showDetails.toggle() }
             } label: {
                 Label("Qué cambia", systemImage: showDetails ? "chevron.down" : "chevron.right")
-                    .font(.caption)
+                    .font(.uiCaption)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -189,13 +190,13 @@ struct TweakRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(Array(app.engine.currentValues(tweak).enumerated()), id: \.offset) { _, item in
                         Text(item.action.command)
-                            .font(.system(.caption, design: .monospaced))
+                            .font(.uiMono)
                             .textSelection(.enabled)
                         Text("Ahora: \(describe(item.stored))")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.uiCaption).foregroundStyle(.secondary)
                     }
                     if !tweak.restart.isEmpty {
-                        Text("Reinicia: \(tweak.restart.joined(separator: ", "))").font(.caption).foregroundStyle(.secondary)
+                        Text("Reinicia: \(tweak.restart.joined(separator: ", "))").font(.uiCaption).foregroundStyle(.secondary)
                     }
                 }
                 .padding(.leading, 18)
@@ -224,7 +225,7 @@ struct Tag: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.weight(.medium))
+            .font(.uiCaption2.weight(.medium))
             .padding(.horizontal, 6).padding(.vertical, 1)
             .background(color.opacity(0.15), in: Capsule())
             .foregroundStyle(color)
@@ -302,7 +303,7 @@ struct DiskView: View {
                 Section("Analizar y liberar espacio") {
                     Text("DiskTree no está instalada.")
                     Text("En ~/ClaudeCode/DiskTreeMac ejecuta Scripts/build.sh --install")
-                        .font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary).textSelection(.enabled)
+                        .font(.uiMono).foregroundStyle(.secondary).textSelection(.enabled)
                 }
             } else if !links {
                 Section {
@@ -353,7 +354,7 @@ private struct DiskTreeRow: View {
                 Image(systemName: icon).foregroundStyle(Color.accentColor).frame(width: 22)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
-                    Text(detail).font(.caption).foregroundStyle(.secondary)
+                    Text(detail).font(.uiCaption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "arrow.up.forward.app").foregroundStyle(.tertiary)

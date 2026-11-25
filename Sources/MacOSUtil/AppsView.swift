@@ -13,7 +13,7 @@ struct AppsView: View {
                     Label("Homebrew no está instalado", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.orange)
                     Text("Las apps se instalan con Homebrew. Descarga el instalador oficial (.pkg) desde GitHub, ábrelo y, cuando termine, pulsa «Volver a comprobar».")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.uiCallout).foregroundStyle(.secondary)
                     HStack {
                         Button("Abrir la página del instalador") { NSWorkspace.shared.open(Homebrew.installerPage) }
                         Button("Volver a comprobar") { model.refresh() }
@@ -82,7 +82,7 @@ struct AppRow: View {
                     if model.needsAdmin(app) { Tag(text: "Pide contraseña", color: .secondary) }
                     if app.appStore != nil { Tag(text: "App Store", color: .blue) }
                 }
-                Text(app.description).font(.callout).foregroundStyle(.secondary)
+                Text(app.description).font(.uiCallout).foregroundStyle(.secondary)
             }
             Spacer(minLength: 8)
             actions(status)
@@ -148,7 +148,7 @@ struct AppsBar: View {
                     ProgressView().controlSize(.small)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(model.currentTask ?? "Trabajando…")
-                        Text(model.log.last ?? "").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(model.log.last ?? "").font(.uiCaption).foregroundStyle(.secondary).lineLimit(1)
                     }
                 } else {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.accentColor)
@@ -175,12 +175,12 @@ struct LogSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Registro de Homebrew").font(.headline)
+            Text("Registro de Homebrew").font(.uiHeadline)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 2) {
                         ForEach(Array(root.apps.log.enumerated()), id: \.offset) { i, line in
-                            Text(line).font(.system(.caption, design: .monospaced)).textSelection(.enabled).id(i)
+                            Text(line).font(.uiMono).textSelection(.enabled).id(i)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

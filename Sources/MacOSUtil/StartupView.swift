@@ -104,7 +104,7 @@ struct StartupView: View {
                 }
                 HStack {
                     Text("Las apps que se abren al iniciar sesión se gestionan en Ajustes del Sistema.")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.uiCallout).foregroundStyle(.secondary)
                     Spacer()
                     Button("Abrir Ítems de inicio") { NSWorkspace.shared.open(Self.loginItemsURL) }.controlSize(.small)
                 }
@@ -147,8 +147,8 @@ private struct Stat: View {
     let label: String
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit()
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(value).font(.uiTitle2.weight(.semibold)).monospacedDigit()
+            Text(label).font(.uiCaption).foregroundStyle(.secondary)
         }
     }
 }
@@ -178,12 +178,12 @@ struct StartupRow: View {
                     else if item.ownerAppMissing && item.scope != .daemon { Tag(text: "No se encontró su app", color: .yellow) }
                     if model.isManaged(item) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
                 }
-                Text(item.label).font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary).textSelection(.enabled)
+                Text(item.label).font(.uiMono).foregroundStyle(.secondary).textSelection(.enabled)
                 if !item.schedule.isEmpty {
-                    Text(item.schedule.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
+                    Text(item.schedule.joined(separator: " · ")).font(.uiCaption).foregroundStyle(.secondary)
                 }
                 if let program = item.program {
-                    Text(program).font(.caption2).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
+                    Text(program).font(.uiCaption2).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                         .textSelection(.enabled)
                 }
             }

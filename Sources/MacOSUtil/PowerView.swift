@@ -115,7 +115,7 @@ struct PowerView: View {
         Form {
             Section {
                 Text("Cuándo duerme el Mac y qué hace mientras duerme. Cambiarlos pide tu contraseña de administrador una vez por cada vez que pulsas «Aplicar».")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.uiCallout).foregroundStyle(.secondary)
                 if model.managedCount > 0 {
                     HStack {
                         Text("MacOSUtil cambió \(model.managedCount) \(model.managedCount == 1 ? "ajuste" : "ajustes").")
@@ -183,9 +183,9 @@ private struct PowerRow: View {
                     if model.isPending(source, setting.key) { Tag(text: "Sin aplicar", color: .blue) }
                     else if model.isManaged(source, setting.key) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
                 }
-                Text(setting.description).font(.caption).foregroundStyle(.secondary)
+                Text(setting.description).font(.uiCaption).foregroundStyle(.secondary)
                 if let caveat = setting.caveat {
-                    Text(caveat).font(.caption).foregroundStyle(.orange)
+                    Text(caveat).font(.uiCaption).foregroundStyle(.orange)
                 }
             }
             Spacer(minLength: 12)
@@ -272,7 +272,7 @@ struct SpotlightSection: View {
                     Image(systemName: v.path == "/" ? "internaldrive" : "externaldrive").foregroundStyle(.secondary).frame(width: 22)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(v.name)
-                        Text(v.detail).font(.caption).foregroundStyle(.secondary)
+                        Text(v.detail).font(.uiCaption).foregroundStyle(.secondary)
                     }
                     Spacer()
                     if model.busy.contains(v.id) {
