@@ -1,5 +1,6 @@
 import Foundation
 import Privileged
+import Health
 import TweakEngine
 import AppCatalog
 import Startup
@@ -233,6 +234,38 @@ enum SelfTest {
         check(!live.isEmpty, "pmset en este Mac: \(live.keys.map { $0 == .battery ? "batería" : "corriente" }.sorted().joined(separator: ", "))")
         let vols = Spotlight.volumes()
         check(vols.contains { $0.path == "/" }, "volúmenes: \(vols.map { "\($0.name) (\($0.indexing.map { $0 ? "indexa" : "no indexa" } ?? "?"))" }.joined(separator: ", "))")
+
+        print("== Estado del Mac")
+        let now = Date(timeIntervalSince1970: 1_795_600_000)
+        let day: TimeInterval = 86_400
+        check(HealthScanner.parseSIP("System Integrity Protection status: enabled.").status == .good
+              && HealthScanner.parseSIP("System Integrity Protection status: disabled.").status == .bad, "lee SIP")
+        check(HealthScanner.parseFileVault("FileVault is On.").status == .good
+              && HealthScanner.parseFileVault("FileVault is Off.").status == .warning, "lee FileVault")
+        let upd = HealthScanner.parseUpdates(["RecommendedUpdates": [["Display Name": "macOS\u{00a0}27.2.1"]],
+                                             "CriticalUpdateInstall": true, "AutomaticCheckEnabled": true], now: now)
+        check(upd.first?.status == .warning && upd.first?.detail.contains("macOS 27.2.1") == true, "actualización de macOS pendiente = aviso")
+        check(HealthScanner.parseUpdates(["CriticalUpdateInstall": false], now: now).contains { $0.id == "autoupdate" && $0.status == .warning },
+              "respuestas de seguridad desactivadas = aviso")
+        let tmRecent: [String: Any] = ["AutoBackup": true, "Destinations": [["SnapshotDates": [now.addingTimeInterval(-day)], "LastKnownVolumeName": "TM"]]]
+        let tmOld: [String: Any] = ["AutoBackup": true, "Destinations": [["SnapshotDates": [now.addingTimeInterval(-40 * day)]]]]
+        let tmManual: [String: Any] = ["AutoBackup": 0, "Destinations": [["SnapshotDates": [now.addingTimeInterval(-day)]]]]
+        check(HealthScanner.parseTimeMachine(tmRecent, now: now).status == .good
+              && HealthScanner.parseTimeMachine(tmOld, now: now).status == .bad
+              && HealthScanner.parseTimeMachine(tmManual, now: now).status == .warning
+              && HealthScanner.parseTimeMachine([:], now: now).status == .warning, "Time Machine: reciente, antigua, manual, sin configurar")
+        check(HealthScanner.parseDiskInfo(id: "disk0", "   Device / Media Name:  APPLE SSD\n   SMART Status:  Verified\n   Device Location: Internal").status == .good
+              && HealthScanner.parseDiskInfo(id: "disk1", "   SMART Status:  Failing").status == .bad
+              && HealthScanner.parseDiskInfo(id: "disk4", "   SMART Status:  Not Supported\n   Protocol: USB").status == .info
+              && HealthScanner.parseDiskInfo(id: "disk9", nil).status == .warning, "SMART: correcto, fallando, no soportado, sin respuesta")
+        check(HealthScanner.evaluateFreeSpace(free: 5, total: 100).status == .bad && HealthScanner.evaluateFreeSpace(free: 15, total: 100).status == .warning
+              && HealthScanner.evaluateFreeSpace(free: 50, total: 100).status == .good, "espacio libre: <10 %, <20 %, bien")
+        check(HealthScanner.parseBattery("      Cycle Count: 412\n      Condition: Service Recommended\n").status == .warning
+              && HealthScanner.parseBattery("      Cycle Count: 50\n      Condition: Normal\n      Maximum Capacity: 98%").status == .good, "batería")
+        let t0 = Date()
+        let healthLive = HealthScanner.run()
+        check(!healthLive.isEmpty && Set(healthLive.map(\.id)).count == healthLive.count, "comprobaciones en este Mac: \(healthLive.count) en \(String(format: "%.1f", Date().timeIntervalSince(t0))) s")
+        for c in healthLive where c.status >= .warning { print("    ⚠︎ \(c.title): \(c.detail)") }
 
         print("== DiskTree")
         check(DiskTreeLink.Destination.tab("cleanup").url?.absoluteString == "disktree://open?tab=cleanup", "enlace a pestaña")

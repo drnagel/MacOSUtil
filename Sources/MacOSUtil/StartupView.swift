@@ -118,7 +118,7 @@ struct StartupView: View {
                     } header: {
                         Text(scope.title)
                     } footer: {
-                        Text(scope.subtitle).frame(maxWidth: .infinity, alignment: .leading)
+                        Text(scope.subtitle).footerStyle()
                     }
                 }
             }

@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 
 enum SidebarItem: Hashable {
     case category(String)
+    case health
     case apps
     case startup
     case power
@@ -21,6 +22,7 @@ final class AppModel {
     let apps = AppsModel()
     let startup = StartupModel()
     let power = PowerModel()
+    let health = HealthModel()
     private(set) var catalog: Catalog?
     private(set) var loadError: String?
     private(set) var statuses: [String: TweakStatus] = [:]

@@ -18,3 +18,11 @@ extension Font {
     static let uiTitle2 = sized(17)
     static let uiMono = Font.system(size: (10.5 * scale).rounded(), design: .monospaced)
 }
+
+extension View {
+    /// Texto bajo una sección del formulario: pequeño, gris y alineado a la izquierda
+    /// (si no, hereda el tamaño del cuerpo y parece un título).
+    func footerStyle() -> some View {
+        font(.uiCaption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+    }
+}

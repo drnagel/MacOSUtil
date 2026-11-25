@@ -289,7 +289,7 @@ struct SpotlightSection: View {
         } header: {
             Text("Indexación de Spotlight")
         } footer: {
-            Text("Desactivarla en discos de copias o de archivo ahorra CPU y escrituras. En el disco de arranque, Spotlight, Mail y Ajustes dejan de encontrar cosas. Cada cambio pide tu contraseña.")
+            Text("Desactivarla en discos de copias o de archivo ahorra CPU y escrituras. En el disco de arranque, Spotlight, Mail y Ajustes dejan de encontrar cosas. Cada cambio pide tu contraseña.").footerStyle()
         }
         .onAppear { model.refresh() }
         .confirmationDialog("¿Desactivar la indexación de «\(confirmOff?.name ?? "")»?",

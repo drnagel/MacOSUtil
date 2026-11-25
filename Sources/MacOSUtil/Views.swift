@@ -19,6 +19,8 @@ struct RootView: View {
                     switch app.selection {
                     case .category(let id):
                         if let c = app.catalog?.categories.first(where: { $0.id == id }) { CategoryView(category: c) }
+                    case .health:
+                        HealthView()
                     case .apps:
                         AppsView()
                     case .startup:
@@ -41,7 +43,7 @@ struct RootView: View {
                     .help("Asistente de configuración: perfiles de ajustes y apps")
             }
             ToolbarItem {
-                Button { app.refresh(); app.apps.refresh(); app.startup.refresh(); app.power.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
+                Button { app.refresh(); app.apps.refresh(); app.startup.refresh(); app.power.refresh(); app.health.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
                     .help("Vuelve a leer el estado actual de cada ajuste (⌘R)")
             }
             ToolbarItem {
@@ -59,6 +61,8 @@ struct RootView: View {
         }
         .sheet(item: $app.wizard) { WizardView(model: $0).font(.uiBody) }
         .onAppear {
+            // Para el contador de avisos de la barra lateral.
+            app.health.refresh()
             // La primera vez que se abre la app, se ofrece el asistente.
             if !UserDefaults.standard.bool(forKey: "wizardOffered") {
                 UserDefaults.standard.set(true, forKey: "wizardOffered")
@@ -85,6 +89,9 @@ struct Sidebar: View {
                 }
             }
             Section("Sistema") {
+                Label("Estado del Mac", systemImage: "checkmark.shield")
+                    .badge(app.health.issueCount)
+                    .tag(SidebarItem.health)
                 Label("Apps", systemImage: "square.grid.2x2")
                     .badge(app.apps.installedCount)   // 0 (o aún sin consultar) no muestra contador
                     .tag(SidebarItem.apps)
@@ -117,7 +124,7 @@ struct CategoryView: View {
                 } header: {
                     Text("Se cambian en Ajustes del Sistema")
                 } footer: {
-                    Text("macOS no deja cambiar estas opciones desde otras apps. El botón abre el panel exacto.")
+                    Text("macOS no deja cambiar estas opciones desde otras apps. El botón abre el panel exacto.").footerStyle()
                 }
             }
         }
@@ -311,7 +318,7 @@ struct DiskView: View {
                 } header: {
                     Text("Analizar y liberar espacio")
                 } footer: {
-                    Text("Esta versión de DiskTree no admite enlaces directos. Recompílala con Scripts/build.sh --install para saltar a cada sección desde aquí.")
+                    Text("Esta versión de DiskTree no admite enlaces directos. Recompílala con Scripts/build.sh --install para saltar a cada sección desde aquí.").footerStyle()
                 }
             } else {
                 Section {
@@ -321,7 +328,7 @@ struct DiskView: View {
                 } header: {
                     Text("Abrir en DiskTree")
                 } footer: {
-                    Text("DiskTree analiza qué ocupa espacio y se encarga de borrar. MacOSUtil solo te lleva a cada sección.")
+                    Text("DiskTree analiza qué ocupa espacio y se encarga de borrar. MacOSUtil solo te lleva a cada sección.").footerStyle()
                 }
                 Section("Carpetas que suelen crecer") {
                     ForEach(Self.folders, id: \.path) { f in

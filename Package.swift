@@ -20,6 +20,11 @@ let package = Package(
             name: "Privileged",
             path: "Sources/Privileged"
         ),
+        // Estado del Mac: seguridad, actualizaciones, copias, discos y sistema. Solo lectura, sin contraseña.
+        .target(
+            name: "Health",
+            path: "Sources/Health"
+        ),
         // Servicios que arrancan solos (launchd): listar, desactivar y reactivar.
         .target(
             name: "Startup",
@@ -33,7 +38,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "MacOSUtil",
-            dependencies: ["TweakEngine", "AppCatalog", "Startup", "Profiles", "Privileged"],
+            dependencies: ["TweakEngine", "AppCatalog", "Startup", "Profiles", "Privileged", "Health"],
             path: "Sources/MacOSUtil"
         )
     ],
