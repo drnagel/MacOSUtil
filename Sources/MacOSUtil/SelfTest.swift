@@ -194,6 +194,17 @@ enum SelfTest {
         defer { try? FileManager.default.removeItem(at: tmpStore) }
         for (msg, good) in StartupController.selfTestCycle(storeURL: tmpStore) { check(good, msg) }
 
+        print("== DiskTree")
+        check(DiskTreeLink.Destination.tab("cleanup").url?.absoluteString == "disktree://open?tab=cleanup", "enlace a pestaña")
+        check(DiskTreeLink.Destination.folder("/Users/a b/Library/Caches").url?.absoluteString
+              == "disktree://folder?path=/Users/a%20b/Library/Caches", "enlace a carpeta con espacios")
+        check(DiskTreeLink.Destination.scan.url?.absoluteString == "disktree://scan", "enlace para analizar")
+        if let app = DiskTreeLink.appURL {
+            print("  DiskTree: \((app.path as NSString).abbreviatingWithTildeInPath) · enlaces: \(DiskTreeLink.supportsLinks(app) ? "sí" : "no")")
+        } else {
+            print("  DiskTree no está instalada (se omite)")
+        }
+
         print(ok ? "OK" : "FALLÓ")
         return ok
     }

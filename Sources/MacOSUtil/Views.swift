@@ -264,6 +264,26 @@ struct PendingBar: View {
 struct DiskView: View {
     @State private var volume = VolumeInfo.current()
     @State private var diskTree = DiskTreeLink.appURL
+    @State private var links = DiskTreeLink.supportsLinks()
+
+    private static let shortcuts: [(title: String, detail: String, icon: String, tab: String)] = [
+        ("Qué ocupa espacio", "Los archivos más grandes del Mac", "doc.badge.ellipsis", "large"),
+        ("Limpieza", "Cachés, registros, papelera y restos de desarrollo", "sparkles", "cleanup"),
+        ("Apps y sus restos", "Lo que ocupa cada app y lo que dejan las borradas", "app.badge.checkmark", "apps"),
+        ("Duplicados", "Archivos repetidos", "doc.on.doc", "duplicates"),
+        ("Qué creció", "Cambios desde el último análisis", "chart.line.uptrend.xyaxis", "changes"),
+    ]
+
+    /// Carpetas que suelen crecer sin que nadie se dé cuenta. Solo se muestran las que existen.
+    private static var folders: [(title: String, path: String)] {
+        let home = NSHomeDirectory()
+        return [
+            ("Descargas", home + "/Downloads"),
+            ("Cachés de apps", home + "/Library/Caches"),
+            ("Xcode y simuladores", home + "/Library/Developer"),
+            ("Contenedores de apps", home + "/Library/Containers"),
+        ].filter { FileManager.default.fileExists(atPath: $0.1) }
+    }
 
     var body: some View {
         Form {
@@ -273,23 +293,37 @@ struct DiskView: View {
                 ProgressView(value: volume.usedFraction)
                     .tint(volume.usedFraction > 0.9 ? .red : .accentColor)
             }
-            Section {
-                if let url = diskTree {
-                    LabeledContent("DiskTree") {
-                        Text(url.path).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
-                    }
-                    Button { DiskTreeLink.open() } label: {
-                        Label("Abrir DiskTree", systemImage: "arrow.up.forward.app")
-                    }
-                } else {
+            if diskTree == nil {
+                Section("Analizar y liberar espacio") {
                     Text("DiskTree no está instalada.")
                     Text("En ~/ClaudeCode/DiskTreeMac ejecuta Scripts/build.sh --install")
                         .font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary).textSelection(.enabled)
                 }
-            } header: {
-                Text("Analizar y liberar espacio")
-            } footer: {
-                Text("DiskTree analiza qué ocupa espacio y limpia cachés, proyectos, apps y duplicados.")
+            } else if !links {
+                Section {
+                    Button { DiskTreeLink.open() } label: { Label("Abrir DiskTree", systemImage: "arrow.up.forward.app") }
+                } header: {
+                    Text("Analizar y liberar espacio")
+                } footer: {
+                    Text("Esta versión de DiskTree no admite enlaces directos. Recompílala con Scripts/build.sh --install para saltar a cada sección desde aquí.")
+                }
+            } else {
+                Section {
+                    ForEach(Self.shortcuts, id: \.tab) { s in
+                        DiskTreeRow(title: s.title, detail: s.detail, icon: s.icon) { DiskTreeLink.open(.tab(s.tab)) }
+                    }
+                } header: {
+                    Text("Abrir en DiskTree")
+                } footer: {
+                    Text("DiskTree analiza qué ocupa espacio y se encarga de borrar. MacOSUtil solo te lleva a cada sección.")
+                }
+                Section("Carpetas que suelen crecer") {
+                    ForEach(Self.folders, id: \.path) { f in
+                        DiskTreeRow(title: f.title, detail: (f.path as NSString).abbreviatingWithTildeInPath, icon: "folder") {
+                            DiskTreeLink.open(.folder(f.path))
+                        }
+                    }
+                }
             }
         }
         .formStyle(.grouped)
@@ -297,6 +331,30 @@ struct DiskView: View {
         .onAppear {
             volume = .current()
             diskTree = DiskTreeLink.appURL
+            links = DiskTreeLink.supportsLinks(diskTree)
         }
+    }
+}
+
+private struct DiskTreeRow: View {
+    let title: String
+    let detail: String
+    let icon: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon).foregroundStyle(Color.accentColor).frame(width: 22)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                    Text(detail).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "arrow.up.forward.app").foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
