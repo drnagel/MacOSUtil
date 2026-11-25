@@ -1,0 +1,16 @@
+{
+  "id": "developer",
+  "title": "Desarrollador",
+  "description": "Archivos ocultos visibles, teclado rápido y sin correcciones automáticas que estropean código, Dock fuera del camino y herramientas de terminal y contenedores.",
+  "icon": "chevron.left.forwardslash.chevron.right",
+  "order": 20,
+  "tweaks": [
+    "finder.show-extensions", "finder.show-hidden-files", "finder.path-bar", "finder.status-bar", "finder.folders-first",
+    "finder.search-current-folder", "finder.no-extension-warning", "finder.list-view", "finder.no-ds-store-external",
+    "dock.autohide", "dock.no-autohide-delay", "dock.fast-animation", "dock.no-recents",
+    "keyboard.repeat-on-hold", "keyboard.fast-repeat", "keyboard.no-smart-punctuation", "keyboard.no-autocorrect",
+    "interface.expanded-save-panel", "interface.save-to-disk",
+    "privacy.terminal-secure-keyboard"
+  ],
+  "apps": ["rectangle", "raycast", "maccy", "ghostty", "visual-studio-code", "orbstack", "stats", "pearcleaner", "the-unarchiver"]
+}

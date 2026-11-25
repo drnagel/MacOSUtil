@@ -1,0 +1,13 @@
+{
+  "id": "laptop",
+  "title": "Portátil",
+  "description": "Más espacio en pantallas pequeñas y uso cómodo del trackpad: Dock oculto, tocar para hacer clic, iconos de la barra de menús ordenados y control del reposo.",
+  "icon": "laptopcomputer",
+  "order": 50,
+  "tweaks": [
+    "dock.autohide", "dock.no-autohide-delay", "dock.fast-animation", "dock.no-recents", "dock.fixed-spaces",
+    "keyboard.tap-to-click",
+    "finder.show-extensions", "finder.path-bar"
+  ],
+  "apps": ["jordanbaird-ice", "stats", "keepingyouawake", "alt-tab", "rectangle"]
+}

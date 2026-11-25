@@ -1,0 +1,14 @@
+{
+  "id": "creative",
+  "title": "Creativo",
+  "description": "Capturas limpias y sin esperas, archivos guardados en el Mac y control fino de monitores externos y del ratón.",
+  "icon": "paintbrush",
+  "order": 30,
+  "tweaks": [
+    "finder.show-extensions", "finder.path-bar", "finder.folders-first",
+    "screenshots.no-shadow", "screenshots.no-thumbnail",
+    "dock.autohide", "dock.no-autohide-delay", "dock.no-recents",
+    "interface.expanded-save-panel", "interface.save-to-disk"
+  ],
+  "apps": ["rectangle", "shottr", "iina", "keka", "monitorcontrol", "betterdisplay", "linearmouse"]
+}

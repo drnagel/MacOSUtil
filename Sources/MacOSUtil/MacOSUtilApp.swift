@@ -23,6 +23,14 @@ struct MacOSUtilApp: App {
         .defaultSize(width: 1040, height: 720)
         .commands {
             CommandGroup(replacing: .newItem) {}
+            CommandMenu("Configuración") {
+                Button("Asistente de configuración…") { app.openWizard() }.keyboardShortcut("n", modifiers: [.command, .shift])
+                Divider()
+                Button("Exportar configuración…") { app.exportSetup() }.keyboardShortcut("e", modifiers: [.command, .shift])
+                Button("Importar configuración…") { app.importSetup() }.keyboardShortcut("i", modifiers: [.command, .shift])
+                Divider()
+                Button("Reaplicar última configuración") { app.reapplyLast() }
+            }
             CommandMenu("Ajustes") {
                 Button("Volver a comprobar") { app.refresh(); app.apps.refresh(); app.startup.refresh() }.keyboardShortcut("r", modifiers: .command)
                 Button("Recargar catálogo") { app.load(); app.apps.load(); app.apps.refresh() }.keyboardShortcut("r", modifiers: [.command, .shift])

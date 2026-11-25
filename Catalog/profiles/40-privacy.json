@@ -1,0 +1,13 @@
+{
+  "id": "privacy",
+  "title": "Privacidad",
+  "description": "Todo lo que se puede apagar sin root: anuncios, identificador de publicidad, búsquedas compartidas y sugerencias. Firewall de salida y vigilancia de lo que arranca solo.",
+  "icon": "hand.raised",
+  "order": 40,
+  "tweaks": [
+    "privacy.no-personalized-ads", "privacy.no-ad-identifier", "privacy.no-search-sharing",
+    "privacy.no-lookup-suggestions", "privacy.terminal-secure-keyboard",
+    "finder.show-extensions", "finder.no-ds-store-external", "interface.save-to-disk"
+  ],
+  "apps": ["lulu", "knockknock", "blockblock", "firefox", "pearcleaner"]
+}

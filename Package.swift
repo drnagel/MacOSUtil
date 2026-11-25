@@ -20,9 +20,14 @@ let package = Package(
             name: "Startup",
             path: "Sources/Startup"
         ),
+        // Perfiles del asistente y archivos de configuración exportados. Solo ids: no depende de los otros módulos.
+        .target(
+            name: "Profiles",
+            path: "Sources/Profiles"
+        ),
         .executableTarget(
             name: "MacOSUtil",
-            dependencies: ["TweakEngine", "AppCatalog", "Startup"],
+            dependencies: ["TweakEngine", "AppCatalog", "Startup", "Profiles"],
             path: "Sources/MacOSUtil"
         )
     ],

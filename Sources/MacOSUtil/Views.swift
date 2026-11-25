@@ -34,6 +34,10 @@ struct RootView: View {
         }
         .toolbar {
             ToolbarItem {
+                Button { app.openWizard() } label: { Label("Asistente", systemImage: "wand.and.stars") }
+                    .help("Asistente de configuración: perfiles de ajustes y apps")
+            }
+            ToolbarItem {
                 Button { app.refresh(); app.apps.refresh(); app.startup.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
                     .help("Vuelve a leer el estado actual de cada ajuste (⌘R)")
             }
@@ -49,6 +53,14 @@ struct RootView: View {
             Button("Restaurar \(app.managedCount) ajustes", role: .destructive) { app.revertAll() }
         } message: {
             Text("Cada ajuste que cambió MacOSUtil vuelve al valor que tenía antes.")
+        }
+        .sheet(item: $app.wizard) { WizardView(model: $0) }
+        .onAppear {
+            // La primera vez que se abre la app, se ofrece el asistente.
+            if !UserDefaults.standard.bool(forKey: "wizardOffered") {
+                UserDefaults.standard.set(true, forKey: "wizardOffered")
+                app.openWizard()
+            }
         }
         .alert(item: $app.banner) { b in
             Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))

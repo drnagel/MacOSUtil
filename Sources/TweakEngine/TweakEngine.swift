@@ -17,6 +17,8 @@ public struct BatchResult: Sendable {
     public var failed: [(id: String, error: String)] = []
     public var restarted: [String] = []
     public var needsLogout = false
+
+    public init() {}
 }
 
 /// Aplica, comprueba y revierte ajustes del catálogo. Guarda los valores originales en `StateStore`.

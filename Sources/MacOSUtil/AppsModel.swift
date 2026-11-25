@@ -59,26 +59,29 @@ final class AppsModel {
 
     /// Consulta Homebrew (una sola llamada para todo el catálogo) y lo que hay en /Applications.
     func refresh() {
+        Task { await refreshNow() }
+    }
+
+    /// Igual que `refresh()` pero se puede esperar (exportar necesita el estado al día).
+    func refreshNow() async {
         guard let catalog, !isChecking else { return }
         brewInstalled = Homebrew.isInstalled
         isChecking = true
         let tokens = catalog.allApps.compactMap(\.cask)
-        Task {
-            let info = brewInstalled ? await Homebrew.info(tokens) : [:]
-            self.info = info
-            var s: [String: AppStatus] = [:]
-            for a in catalog.allApps {
-                if a.cask != nil && !brewInstalled {
-                    // Sin Homebrew solo se puede saber si la app está en /Applications.
-                    s[a.id] = .notInstalled
-                } else {
-                    s[a.id] = Homebrew.status(of: a, info: info)
-                }
+        let info = brewInstalled ? await Homebrew.info(tokens) : [:]
+        self.info = info
+        var s: [String: AppStatus] = [:]
+        for a in catalog.allApps {
+            if a.cask != nil && !brewInstalled {
+                // Sin Homebrew solo se puede saber si la app está en /Applications.
+                s[a.id] = .notInstalled
+            } else {
+                s[a.id] = Homebrew.status(of: a, info: info)
             }
-            statuses = s
-            selected = selected.filter { id in s[id] == .notInstalled }
-            isChecking = false
         }
+        statuses = s
+        selected = selected.filter { id in s[id] == .notInstalled }
+        isChecking = false
     }
 
     // MARK: Acciones
@@ -137,33 +140,66 @@ final class AppsModel {
 
     private typealias Job = (title: String, run: (@escaping @Sendable (String) -> Void) async -> Homebrew.RunResult)
 
-    /// Ejecuta trabajos de brew uno detrás de otro, con la salida en vivo en `log`.
+    /// Ejecuta trabajos de brew uno detrás de otro, con la salida en vivo en `log`, y muestra el resultado.
     private func runJobs(_ jobs: [Job], note: String?) {
         guard !isRunning else { return }
-        isRunning = true
-        log = []
         Task {
-            var failed: [String] = []
-            var done = 0
-            for job in jobs {
-                currentTask = job.title
-                append("==> \(job.title)")
-                let result = await job.run { line in Task { @MainActor in self.append(line) } }
-                if result.ok { done += 1 } else {
-                    failed.append(job.title)
-                    // brew explica el error en sus últimas líneas
-                    let tail = result.output.split(separator: "\n").suffix(3).joined(separator: " ")
-                    append("✗ \(tail)")
-                }
-            }
-            currentTask = nil
-            isRunning = false
+            let results = await executeJobs(jobs)
+            let failed = zip(jobs, results).filter { !$1 }.map(\.0.title)
+            let done = results.filter { $0 }.count
             var text = done == 1 ? "1 tarea completada." : "\(done) tareas completadas."
             if !failed.isEmpty { text += "\nCon error: \(failed.joined(separator: ", ")). Mira el registro para ver el motivo." }
             if let note { text += "\n\n" + note }
             banner = .init(text: text, isError: !failed.isEmpty)
             refresh()
         }
+    }
+
+    /// Núcleo de `runJobs`: devuelve, por cada trabajo, si terminó bien.
+    private func executeJobs(_ jobs: [Job]) async -> [Bool] {
+        isRunning = true
+        log = []
+        var results: [Bool] = []
+        for job in jobs {
+            currentTask = job.title
+            append("==> \(job.title)")
+            let result = await job.run { line in Task { @MainActor in self.append(line) } }
+            results.append(result.ok)
+            if !result.ok {
+                // brew explica el error en sus últimas líneas
+                let tail = result.output.split(separator: "\n").suffix(3).joined(separator: " ")
+                append("✗ \(tail)")
+            }
+        }
+        currentTask = nil
+        isRunning = false
+        return results
+    }
+
+    /// Resultado de instalar un lote desde el asistente.
+    struct InstallOutcome {
+        var installed: [String] = []
+        var failed: [String] = []
+        /// Se abrieron en Terminal porque piden contraseña.
+        var inTerminal: [String] = []
+    }
+
+    /// Instala un lote y espera a que termine (lo usa el asistente). Las que piden contraseña van a Terminal.
+    func install(_ apps: [AppEntry]) async -> InstallOutcome {
+        var outcome = InstallOutcome()
+        let list = apps.filter { $0.cask != nil && !status($0).isInstalled }
+        let admin = list.filter { needsAdmin($0) }
+        let direct = list.filter { !needsAdmin($0) }
+        if !admin.isEmpty {
+            Homebrew.openInTerminal(admin.compactMap(\.cask).map { ["install", "--cask", $0] },
+                                    title: "MacOSUtil: instalando \(admin.map(\.name).joined(separator: ", ")) (pide contraseña)")
+            outcome.inTerminal = admin.map(\.name)
+        }
+        guard !direct.isEmpty, !isRunning else { return outcome }
+        let results = await executeJobs(direct.map { a in ("Instalando \(a.name)", { await Homebrew.install(a.cask!, onLine: $0) }) })
+        for (a, ok) in zip(direct, results) { if ok { outcome.installed.append(a.name) } else { outcome.failed.append(a.name) } }
+        refresh()
+        return outcome
     }
 
     private func append(_ line: String) {

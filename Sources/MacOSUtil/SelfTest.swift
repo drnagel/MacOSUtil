@@ -2,6 +2,7 @@ import Foundation
 import TweakEngine
 import AppCatalog
 import Startup
+import Profiles
 
 /// `MacOSUtil --selftest`: valida el catálogo, muestra el estado de cada ajuste en este Mac y prueba
 /// aplicar → comprobar → revertir sobre un dominio de prueba (no toca ninguna preferencia real).
@@ -137,6 +138,37 @@ enum SelfTest {
             }
         } catch {
             check(false, error.localizedDescription)
+        }
+
+        // 4b. Perfiles y archivo de configuración
+        print("== Perfiles")
+        do {
+            let profiles = try ProfileCatalog.load(from: dir)
+            let appIDs = Set(((try? AppCatalogFile.load(from: dir))?.allApps ?? []).map(\.id))
+            let tweakIDs = Set(catalog.allTweaks.map(\.id))
+            let problems = ProfileCatalog.validate(profiles, tweakIDs: tweakIDs, appIDs: appIDs)
+            check(problems.isEmpty, "\(profiles.count) perfiles válidos" + (problems.isEmpty ? "" : ": " + problems.joined(separator: "; ")))
+            for p in profiles { print("    \(p.title): \(p.tweaks.count) ajustes, \(p.apps.count) apps") }
+            let bad = Profile(id: "x", title: "x", description: "", icon: "x", order: 0, tweaks: ["no.existe"], apps: ["tampoco"])
+            check(ProfileCatalog.validate([bad], tweakIDs: tweakIDs, appIDs: appIDs).count == 2, "detecta ajustes y apps inexistentes en un perfil")
+
+            let setup = SetupFile(macOS: SetupFile.currentMacOS, profile: "developer", tweaks: ["dock.autohide", "finder.show-extensions"], apps: ["rectangle"])
+            let back = try SetupFile.decode(setup.encoded())
+            check(back.tweaks == setup.tweaks && back.apps == setup.apps && back.profile == "developer", "exportar → importar conserva ajustes y apps")
+            let text = String(decoding: try setup.encoded(), as: UTF8.self)
+            check(!text.contains(NSUserName()) && !text.contains(Host.current().localizedName ?? "\u{0}"), "el archivo no contiene usuario ni nombre del equipo")
+            var rejected = false
+            do { _ = try SetupFile.decode(Data(#"{"format":"otra-cosa","version":1}"#.utf8)) } catch { rejected = true }
+            check(rejected, "rechaza archivos que no son de MacOSUtil")
+            let withUnknown = SetupFile(macOS: "99", profile: nil, tweaks: ["dock.autohide", "futuro.ajuste"], apps: ["app-futura"])
+            let u = withUnknown.unknown(tweakIDs: tweakIDs, appIDs: appIDs)
+            check(u.tweaks == ["futuro.ajuste"] && u.apps == ["app-futura"], "señala ids desconocidos al importar")
+            let tmpLast = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-last-\(UUID().uuidString).json")
+            defer { try? FileManager.default.removeItem(at: tmpLast) }
+            try LastSetup.save(setup, to: tmpLast)
+            check(LastSetup.load(from: tmpLast) == setup, "guarda y recupera la última configuración")
+        } catch {
+            check(false, "perfiles: \(error.localizedDescription)")
         }
 
         // 5. Servicios de arranque: listado (solo lectura) y ciclo desactivar/reactivar con un agente temporal
