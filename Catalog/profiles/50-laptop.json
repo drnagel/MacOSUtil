@@ -1,13 +1,24 @@
 {
   "id": "laptop",
-  "title": "Portátil",
-  "description": "Más espacio en pantallas pequeñas y uso cómodo del trackpad: Dock oculto, tocar para hacer clic, iconos de la barra de menús ordenados y control del reposo.",
+  "title": { "en": "Laptop", "es": "Portátil" },
+  "description": { "en": "More room on small screens and a comfortable trackpad: hidden Dock, tap to click, tidy menu bar icons and sleep control.", "es": "Más espacio en pantallas pequeñas y uso cómodo del trackpad: Dock oculto, tocar para hacer clic, iconos de la barra de menús ordenados y control del reposo." },
   "icon": "laptopcomputer",
   "order": 50,
   "tweaks": [
-    "dock.autohide", "dock.no-autohide-delay", "dock.fast-animation", "dock.no-recents", "dock.fixed-spaces",
+    "dock.autohide",
+    "dock.no-autohide-delay",
+    "dock.fast-animation",
+    "dock.no-recents",
+    "dock.fixed-spaces",
     "keyboard.tap-to-click",
-    "finder.show-extensions", "finder.path-bar"
+    "finder.show-extensions",
+    "finder.path-bar"
   ],
-  "apps": ["jordanbaird-ice", "stats", "keepingyouawake", "alt-tab", "rectangle"]
+  "apps": [
+    "jordanbaird-ice",
+    "stats",
+    "keepingyouawake",
+    "alt-tab",
+    "rectangle"
+  ]
 }

@@ -57,11 +57,11 @@ public enum TweakError: LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .writeFailed(let cmd): "No se pudo guardar la preferencia (\(cmd))."
+        case .writeFailed(let cmd): L("No se pudo guardar la preferencia (\(cmd)).")
         case .unsupportedValue(let slot, let type):
-            "\(slot) contiene un valor de tipo \(type); no se modifica para no perderlo."
-        case .incompatible(let t): "«\(t)» no está probado en esta versión de macOS."
-        case .needsAdmin(let t): "«\(t)» necesita permisos de administrador (llega en la Fase 2)."
+            L("\(slot) contiene un valor de tipo \(type); no se modifica para no perderlo.")
+        case .incompatible(let t): L("«\(t)» no está probado en esta versión de macOS.")
+        case .needsAdmin(let t): L("«\(t)» necesita permisos de administrador.")
         }
     }
 }

@@ -2,90 +2,219 @@
   "categories": [
     {
       "id": "windows",
-      "title": "Ventanas",
+      "title": { "en": "Windows", "es": "Ventanas" },
       "icon": "rectangle.split.2x1",
       "apps": [
-        { "name": "Rectangle", "cask": "rectangle", "description": "Coloca ventanas en mitades, tercios o esquinas con atajos de teclado o arrastrándolas al borde." },
-        { "name": "AltTab", "cask": "alt-tab", "description": "⌘⇥ como en Windows: muestra cada ventana con su vista previa, no solo cada app." },
-        { "name": "Loop", "cask": "loop", "description": "Organiza ventanas con un menú radial al mantener una tecla. Alternativa a Rectangle." }
+        {
+          "name": "Rectangle",
+          "cask": "rectangle",
+          "description": { "en": "Snap windows to halves, thirds or corners with keyboard shortcuts or by dragging them to the edge.", "es": "Coloca ventanas en mitades, tercios o esquinas con atajos de teclado o arrastrándolas al borde." }
+        },
+        {
+          "name": "AltTab",
+          "cask": "alt-tab",
+          "description": { "en": "⌘⇥ like on Windows: shows every window with a preview, not just every app.", "es": "⌘⇥ como en Windows: muestra cada ventana con su vista previa, no solo cada app." }
+        },
+        {
+          "name": "Loop",
+          "cask": "loop",
+          "description": { "en": "Arrange windows with a radial menu while holding a key. An alternative to Rectangle.", "es": "Organiza ventanas con un menú radial al mantener una tecla. Alternativa a Rectangle." }
+        }
       ]
     },
     {
       "id": "productivity",
-      "title": "Productividad",
+      "title": { "en": "Productivity", "es": "Productividad" },
       "icon": "bolt",
       "apps": [
-        { "name": "Raycast", "cask": "raycast", "description": "Lanzador que sustituye a Spotlight: apps, calculadora, portapapeles, atajos y extensiones." },
-        { "name": "Maccy", "cask": "maccy", "description": "Historial del portapapeles ligero y de código abierto (⇧⌘C)." },
-        { "name": "Itsycal", "cask": "itsycal", "description": "Calendario pequeño en la barra de menús con tus eventos." },
-        { "name": "Shottr", "cask": "shottr", "description": "Capturas de pantalla con anotaciones, OCR, medidas y desenfoque." }
+        {
+          "name": "Raycast",
+          "cask": "raycast",
+          "description": { "en": "A launcher that replaces Spotlight: apps, calculator, clipboard, shortcuts and extensions.", "es": "Lanzador que sustituye a Spotlight: apps, calculadora, portapapeles, atajos y extensiones." }
+        },
+        {
+          "name": "Maccy",
+          "cask": "maccy",
+          "description": { "en": "Lightweight, open-source clipboard history (⇧⌘C).", "es": "Historial del portapapeles ligero y de código abierto (⇧⌘C)." }
+        },
+        {
+          "name": "Itsycal",
+          "cask": "itsycal",
+          "description": { "en": "A small menu bar calendar with your events.", "es": "Calendario pequeño en la barra de menús con tus eventos." }
+        },
+        {
+          "name": "Shottr",
+          "cask": "shottr",
+          "description": { "en": "Screenshots with annotations, OCR, measurements and blur.", "es": "Capturas de pantalla con anotaciones, OCR, medidas y desenfoque." }
+        }
       ]
     },
     {
       "id": "menubar",
-      "title": "Barra de menús",
+      "title": { "en": "Menu bar", "es": "Barra de menús" },
       "icon": "menubar.rectangle",
       "apps": [
-        { "name": "Ice", "cask": "jordanbaird-ice", "description": "Oculta y ordena los iconos de la barra de menús; útil en MacBooks con notch." },
-        { "name": "Stats", "cask": "stats", "description": "CPU, memoria, disco, red, batería y temperaturas en la barra de menús." },
-        { "name": "KeepingYouAwake", "cask": "keepingyouawake", "description": "Evita que el Mac entre en reposo durante un tiempo, con un clic." }
+        {
+          "name": "Ice",
+          "cask": "jordanbaird-ice",
+          "description": { "en": "Hide and arrange menu bar icons; handy on MacBooks with a notch.", "es": "Oculta y ordena los iconos de la barra de menús; útil en MacBooks con notch." }
+        },
+        {
+          "name": "Stats",
+          "cask": "stats",
+          "description": { "en": "CPU, memory, disk, network, battery and temperatures in the menu bar.", "es": "CPU, memoria, disco, red, batería y temperaturas en la barra de menús." }
+        },
+        {
+          "name": "KeepingYouAwake",
+          "cask": "keepingyouawake",
+          "description": { "en": "Keeps your Mac from sleeping for a while, with one click.", "es": "Evita que el Mac entre en reposo durante un tiempo, con un clic." }
+        }
       ]
     },
     {
       "id": "peripherals",
-      "title": "Ratón, teclado y pantallas",
+      "title": { "en": "Mouse, keyboard and displays", "es": "Ratón, teclado y pantallas" },
       "icon": "computermouse",
       "apps": [
-        { "name": "LinearMouse", "cask": "linearmouse", "description": "Ajusta aceleración, velocidad y dirección del desplazamiento por dispositivo." },
-        { "name": "Mos", "cask": "mos", "description": "Desplazamiento suave con ratones de rueda, e invierte su dirección por separado del trackpad." },
-        { "name": "MonitorControl", "cask": "monitorcontrol", "description": "Brillo y volumen de monitores externos con las teclas del Mac." },
-        { "name": "BetterDisplay", "cask": "betterdisplay", "description": "Resoluciones HiDPI, escalado y ajustes avanzados de monitores externos." },
-        { "name": "Karabiner-Elements", "cask": "karabiner-elements", "description": "Reasigna teclas y crea atajos complejos. Instala un controlador: pide contraseña." }
+        {
+          "name": "LinearMouse",
+          "cask": "linearmouse",
+          "description": { "en": "Per-device pointer acceleration, speed and scroll direction.", "es": "Ajusta aceleración, velocidad y dirección del desplazamiento por dispositivo." }
+        },
+        {
+          "name": "Mos",
+          "cask": "mos",
+          "description": { "en": "Smooth scrolling for wheel mice, with a scroll direction separate from the trackpad.", "es": "Desplazamiento suave con ratones de rueda, e invierte su dirección por separado del trackpad." }
+        },
+        {
+          "name": "MonitorControl",
+          "cask": "monitorcontrol",
+          "description": { "en": "Control external display brightness and volume with your Mac's keys.", "es": "Brillo y volumen de monitores externos con las teclas del Mac." }
+        },
+        {
+          "name": "BetterDisplay",
+          "cask": "betterdisplay",
+          "description": { "en": "HiDPI resolutions, scaling and advanced settings for external displays.", "es": "Resoluciones HiDPI, escalado y ajustes avanzados de monitores externos." }
+        },
+        {
+          "name": "Karabiner-Elements",
+          "cask": "karabiner-elements",
+          "description": { "en": "Remap keys and build complex shortcuts. Installs a driver, so it asks for your password.", "es": "Reasigna teclas y crea atajos complejos. Instala un controlador: pide contraseña." }
+        }
       ]
     },
     {
       "id": "media",
-      "title": "Multimedia y archivos",
+      "title": { "en": "Media and files", "es": "Multimedia y archivos" },
       "icon": "play.rectangle",
       "apps": [
-        { "name": "IINA", "cask": "iina", "description": "Reproductor de vídeo moderno que abre casi cualquier formato." },
-        { "name": "Keka", "cask": "keka", "description": "Comprime y descomprime 7z, rar, zip y más." },
-        { "name": "The Unarchiver", "cask": "the-unarchiver", "description": "Descomprime prácticamente cualquier formato de archivo." }
+        {
+          "name": "IINA",
+          "cask": "iina",
+          "description": { "en": "A modern video player that opens almost any format.", "es": "Reproductor de vídeo moderno que abre casi cualquier formato." }
+        },
+        {
+          "name": "Keka",
+          "cask": "keka",
+          "description": { "en": "Compress and extract 7z, rar, zip and more.", "es": "Comprime y descomprime 7z, rar, zip y más." }
+        },
+        {
+          "name": "The Unarchiver",
+          "cask": "the-unarchiver",
+          "description": { "en": "Extracts virtually any archive format.", "es": "Descomprime prácticamente cualquier formato de archivo." }
+        }
       ]
     },
     {
       "id": "system",
-      "title": "Sistema y seguridad",
+      "title": { "en": "System and security", "es": "Sistema y seguridad" },
       "icon": "shield.lefthalf.filled",
       "apps": [
-        { "name": "Pearcleaner", "cask": "pearcleaner", "description": "Desinstala apps junto con sus preferencias, cachés y restos." },
-        { "name": "AppCleaner", "cask": "appcleaner", "description": "Desinstalador clásico: arrastra una app y borra también sus archivos." },
-        { "name": "LuLu", "cask": "lulu", "description": "Firewall de salida: avisa cuando una app intenta conectarse a internet." },
-        { "name": "KnockKnock", "cask": "knockknock", "description": "Muestra todo lo que se ejecuta al arrancar el Mac, para detectar software no deseado." },
-        { "name": "BlockBlock", "cask": "blockblock", "description": "Avisa cuando algo intenta instalarse para arrancar solo." },
-        { "name": "Latest", "cask": "latest", "description": "Revisa si hay actualizaciones de las apps instaladas fuera de la App Store." },
-        { "name": "Amphetamine", "appStore": "937984704", "appName": "Amphetamine.app", "description": "Mantiene el Mac despierto con reglas (apps abiertas, descargas, pantalla externa…). Solo en App Store." }
+        {
+          "name": "Pearcleaner",
+          "cask": "pearcleaner",
+          "description": { "en": "Uninstalls apps together with their preferences, caches and leftovers.", "es": "Desinstala apps junto con sus preferencias, cachés y restos." }
+        },
+        {
+          "name": "AppCleaner",
+          "cask": "appcleaner",
+          "description": { "en": "The classic uninstaller: drag an app in and it removes its files too.", "es": "Desinstalador clásico: arrastra una app y borra también sus archivos." }
+        },
+        {
+          "name": "LuLu",
+          "cask": "lulu",
+          "description": { "en": "Outbound firewall: alerts you when an app tries to connect to the internet.", "es": "Firewall de salida: avisa cuando una app intenta conectarse a internet." }
+        },
+        {
+          "name": "KnockKnock",
+          "cask": "knockknock",
+          "description": { "en": "Shows everything that runs at startup, to spot unwanted software.", "es": "Muestra todo lo que se ejecuta al arrancar el Mac, para detectar software no deseado." }
+        },
+        {
+          "name": "BlockBlock",
+          "cask": "blockblock",
+          "description": { "en": "Alerts you when something tries to install itself to launch automatically.", "es": "Avisa cuando algo intenta instalarse para arrancar solo." }
+        },
+        {
+          "name": "Latest",
+          "cask": "latest",
+          "description": { "en": "Checks for updates to apps installed outside the App Store.", "es": "Revisa si hay actualizaciones de las apps instaladas fuera de la App Store." }
+        },
+        {
+          "name": "Amphetamine",
+          "appStore": "937984704",
+          "appName": "Amphetamine.app",
+          "description": { "en": "Keeps your Mac awake based on rules (open apps, downloads, external display…). App Store only.", "es": "Mantiene el Mac despierto con reglas (apps abiertas, descargas, pantalla externa…). Solo en App Store." }
+        }
       ]
     },
     {
       "id": "browsers",
-      "title": "Navegadores",
+      "title": { "en": "Browsers", "es": "Navegadores" },
       "icon": "globe",
       "apps": [
-        { "name": "Firefox", "cask": "firefox", "description": "Navegador de código abierto de Mozilla." },
-        { "name": "Brave", "cask": "brave-browser", "description": "Basado en Chromium, con bloqueo de anuncios y rastreadores." },
-        { "name": "Google Chrome", "cask": "google-chrome", "description": "El navegador de Google." }
+        {
+          "name": "Firefox",
+          "cask": "firefox",
+          "description": { "en": "Mozilla's open-source browser.", "es": "Navegador de código abierto de Mozilla." }
+        },
+        {
+          "name": "Brave",
+          "cask": "brave-browser",
+          "description": { "en": "Chromium-based, with built-in ad and tracker blocking.", "es": "Basado en Chromium, con bloqueo de anuncios y rastreadores." }
+        },
+        {
+          "name": "Google Chrome",
+          "cask": "google-chrome",
+          "description": { "en": "Google's browser.", "es": "El navegador de Google." }
+        }
       ]
     },
     {
       "id": "dev",
-      "title": "Desarrollo",
+      "title": { "en": "Development", "es": "Desarrollo" },
       "icon": "chevron.left.forwardslash.chevron.right",
       "apps": [
-        { "name": "Ghostty", "cask": "ghostty", "description": "Terminal rápida y nativa, con pestañas y divisiones." },
-        { "name": "iTerm2", "cask": "iterm2", "description": "Terminal veterana con muchas funciones." },
-        { "name": "Visual Studio Code", "cask": "visual-studio-code", "description": "Editor de código de Microsoft." },
-        { "name": "OrbStack", "cask": "orbstack", "description": "Docker y máquinas Linux ligeras; alternativa rápida a Docker Desktop." }
+        {
+          "name": "Ghostty",
+          "cask": "ghostty",
+          "description": { "en": "A fast, native terminal with tabs and splits.", "es": "Terminal rápida y nativa, con pestañas y divisiones." }
+        },
+        {
+          "name": "iTerm2",
+          "cask": "iterm2",
+          "description": { "en": "A veteran, feature-packed terminal.", "es": "Terminal veterana con muchas funciones." }
+        },
+        {
+          "name": "Visual Studio Code",
+          "cask": "visual-studio-code",
+          "description": { "en": "Microsoft's code editor.", "es": "Editor de código de Microsoft." }
+        },
+        {
+          "name": "OrbStack",
+          "cask": "orbstack",
+          "description": { "en": "Docker and lightweight Linux machines; a fast alternative to Docker Desktop.", "es": "Docker y máquinas Linux ligeras; alternativa rápida a Docker Desktop." }
+        }
       ]
     }
   ]

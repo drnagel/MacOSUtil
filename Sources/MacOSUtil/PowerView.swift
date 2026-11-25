@@ -60,7 +60,7 @@ final class PowerModel {
             return (s, parts[1], v, current(s, parts[1]))
         }
         let commands = changes.map { AdminCommand.pmset(source: $0.0, setting: $0.1, value: $0.2) }
-        run(commands, reason: "MacOSUtil quiere cambiar \(commands.count) \(commands.count == 1 ? "ajuste" : "ajustes") de energía.") { outcomes in
+        run(commands, reason: commands.count == 1 ? L("MacOSUtil quiere cambiar 1 ajuste de energía.") : L("MacOSUtil quiere cambiar \(commands.count) ajustes de energía.")) { outcomes in
             for (c, o) in zip(changes, outcomes) where o.ok {
                 if let old = c.3 { try? self.store.remember(c.0, c.1, value: old) }
             }
@@ -71,7 +71,7 @@ final class PowerModel {
     func restoreAll() {
         let commands = store.restoreCommands()
         guard !commands.isEmpty else { return }
-        run(commands, reason: "MacOSUtil quiere devolver los ajustes de energía a sus valores originales.") { outcomes in
+        run(commands, reason: L("MacOSUtil quiere devolver los ajustes de energía a sus valores originales.")) { outcomes in
             for (c, o) in zip(commands, outcomes) where o.ok {
                 if case .pmset(let s, let k, _) = c { try? self.store.forget(s, k) }
             }
@@ -118,7 +118,7 @@ struct PowerView: View {
                     .font(.uiCallout).foregroundStyle(.secondary)
                 if model.managedCount > 0 {
                     HStack {
-                        Text("MacOSUtil cambió \(model.managedCount) \(model.managedCount == 1 ? "ajuste" : "ajustes").")
+                        Text(model.managedCount == 1 ? L("MacOSUtil cambió 1 ajuste.") : L("MacOSUtil cambió \(model.managedCount) ajustes."))
                         Spacer()
                         Button("Restaurar originales") { confirmRestore = true }.disabled(model.isApplying)
                     }
@@ -128,7 +128,7 @@ struct PowerView: View {
                 Section { Text("No se pudieron leer los ajustes de energía (pmset).").foregroundStyle(.secondary) }
             }
             ForEach(model.sources, id: \.self) { src in
-                Section(model.sources.count > 1 ? (src == .battery ? "Con batería" : "Conectado a la corriente") : "Energía") {
+                Section(model.sources.count > 1 ? (src == .battery ? L("Con batería") : L("Conectado a la corriente")) : L("Energía")) {
                     ForEach(model.settings(for: src)) { setting in
                         PowerRow(source: src, setting: setting)
                     }
@@ -145,7 +145,7 @@ struct PowerView: View {
                         ProgressView().controlSize(.small)
                         Text("Aplicando…")
                     } else {
-                        Text("\(model.pending.count) \(model.pending.count == 1 ? "cambio" : "cambios") sin aplicar")
+                        Text(model.pending.count == 1 ? L("1 cambio sin aplicar") : L("\(model.pending.count) cambios sin aplicar"))
                     }
                     Spacer()
                     Button("Descartar") { model.discard() }.disabled(model.isApplying)
@@ -164,7 +164,7 @@ struct PowerView: View {
             Text("Vuelven a los valores que tenían antes de cambiarlos con MacOSUtil. macOS pedirá tu contraseña.")
         }
         .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
+            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
     }
 }
@@ -180,8 +180,8 @@ private struct PowerRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(setting.title)
-                    if model.isPending(source, setting.key) { Tag(text: "Sin aplicar", color: .blue) }
-                    else if model.isManaged(source, setting.key) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
+                    if model.isPending(source, setting.key) { Tag(text: L("Sin aplicar"), color: .blue) }
+                    else if model.isManaged(source, setting.key) { Tag(text: L("Cambiado por MacOSUtil"), color: .green) }
                 }
                 Text(setting.description).font(.uiCaption).foregroundStyle(.secondary)
                 if let caveat = setting.caveat {
@@ -206,7 +206,7 @@ private struct PowerRow: View {
             let all = options.contains(current) ? options : (options + [current]).sorted()
             Picker("", selection: Binding(get: { current }, set: { model.set(source, setting.key, $0) })) {
                 ForEach(all, id: \.self) { m in
-                    Text(m == 0 ? "Nunca" : (m < 60 || m % 60 != 0 ? "\(m) min" : "\(m / 60) h")).tag(m)
+                    Text(m == 0 ? L("Nunca") : (m < 60 || m % 60 != 0 ? "\(m) min" : "\(m / 60) h")).tag(m)
                 }
             }
             .labelsHidden().frame(width: 110).disabled(model.isApplying)
@@ -232,12 +232,12 @@ final class SpotlightModel {
 
     func setIndexing(_ v: Spotlight.Volume, _ on: Bool) {
         run(v, .spotlightIndexing(volume: v.path, enabled: on),
-            reason: "MacOSUtil quiere \(on ? "activar" : "desactivar") la indexación de Spotlight en «\(v.name)».")
+            reason: on ? L("MacOSUtil quiere activar la indexación de Spotlight en «\(v.name)».") : L("MacOSUtil quiere desactivar la indexación de Spotlight en «\(v.name)»."))
     }
 
     func rebuild(_ v: Spotlight.Volume) {
-        run(v, .spotlightRebuild(volume: v.path), reason: "MacOSUtil quiere reconstruir el índice de Spotlight de «\(v.name)».") {
-            self.banner = .init(text: "Spotlight está reconstruyendo el índice de «\(v.name)». Puede tardar un rato y usar CPU mientras tanto.", isError: false)
+        run(v, .spotlightRebuild(volume: v.path), reason: L("MacOSUtil quiere reconstruir el índice de Spotlight de «\(v.name)».")) {
+            self.banner = .init(text: L("Spotlight está reconstruyendo el índice de «\(v.name)». Puede tardar un rato y usar CPU mientras tanto."), isError: false)
         }
     }
 
@@ -298,11 +298,11 @@ struct SpotlightSection: View {
             Button("Desactivar", role: .destructive) { model.setIndexing(v, false) }
         } message: { v in
             Text(v.path == "/"
-                 ? "Es el disco de arranque: la búsqueda de Spotlight, de Mail y de muchas apps dejará de funcionar bien."
-                 : "Spotlight dejará de buscar en este disco. Puedes volver a activarla cuando quieras.")
+                 ? L("Es el disco de arranque: la búsqueda de Spotlight, de Mail y de muchas apps dejará de funcionar bien.")
+                 : L("Spotlight dejará de buscar en este disco. Puedes volver a activarla cuando quieras."))
         }
         .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
+            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
     }
 }

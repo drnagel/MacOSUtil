@@ -23,27 +23,27 @@ public enum Power {
 
     /// Ajustes que se muestran, en orden. Solo aparecen los que `pmset -g custom` lista en este Mac.
     public static let settings: [PowerSetting] = [
-        .init(key: "displaysleep", title: "Apagar la pantalla tras", description: "Minutos sin actividad hasta apagar la pantalla.",
+        .init(key: "displaysleep", title: L("Apagar la pantalla tras"), description: L("Minutos sin actividad hasta apagar la pantalla."),
               kind: .minutes([0, 2, 5, 10, 15, 20, 30, 60]), caveat: nil),
-        .init(key: "sleep", title: "Reposo del Mac tras", description: "Minutos sin actividad hasta dormir el Mac.",
-              kind: .minutes([0, 5, 10, 15, 20, 30, 60, 120]), caveat: "«Nunca» evita cortes en descargas largas pero gasta más energía."),
-        .init(key: "disksleep", title: "Reposo de los discos tras", description: "Minutos hasta parar los discos mecánicos. No afecta a los SSD.",
+        .init(key: "sleep", title: L("Reposo del Mac tras"), description: L("Minutos sin actividad hasta dormir el Mac."),
+              kind: .minutes([0, 5, 10, 15, 20, 30, 60, 120]), caveat: L("«Nunca» evita cortes en descargas largas pero gasta más energía.")),
+        .init(key: "disksleep", title: L("Reposo de los discos tras"), description: L("Minutos hasta parar los discos mecánicos. No afecta a los SSD."),
               kind: .minutes([0, 5, 10, 20, 30, 60]), caveat: nil),
-        .init(key: "lowpowermode", title: "Modo de bajo consumo", description: "Reduce el rendimiento para gastar menos energía y hacer menos ruido.",
+        .init(key: "lowpowermode", title: L("Modo de bajo consumo"), description: L("Reduce el rendimiento para gastar menos energía y hacer menos ruido."),
               kind: .toggle, caveat: nil),
-        .init(key: "powernap", title: "Power Nap", description: "Durante el reposo despierta de vez en cuando para el correo, iCloud y las copias de Time Machine.",
-              kind: .toggle, caveat: "Al desactivarlo, el correo y las copias se ponen al día al despertar."),
-        .init(key: "tcpkeepalive", title: "Mantener la red durante el reposo", description: "Mantiene la conexión para Buscar mi Mac y el acceso remoto.",
-              kind: .toggle, caveat: "Al desactivarlo, Buscar mi Mac no localiza el Mac mientras duerme."),
-        .init(key: "womp", title: "Despertar por acceso a la red", description: "Permite despertar el Mac desde la red (compartir archivos, pantalla).",
+        .init(key: "powernap", title: L("Power Nap"), description: L("Durante el reposo despierta de vez en cuando para el correo, iCloud y las copias de Time Machine."),
+              kind: .toggle, caveat: L("Al desactivarlo, el correo y las copias se ponen al día al despertar.")),
+        .init(key: "tcpkeepalive", title: L("Mantener la red durante el reposo"), description: L("Mantiene la conexión para Buscar mi Mac y el acceso remoto."),
+              kind: .toggle, caveat: L("Al desactivarlo, Buscar mi Mac no localiza el Mac mientras duerme.")),
+        .init(key: "womp", title: L("Despertar por acceso a la red"), description: L("Permite despertar el Mac desde la red (compartir archivos, pantalla)."),
               kind: .toggle, caveat: nil),
-        .init(key: "proximitywake", title: "Despertar con dispositivos cercanos", description: "Despierta al acercar un iPhone o Apple Watch con tu cuenta.",
+        .init(key: "proximitywake", title: L("Despertar con dispositivos cercanos"), description: L("Despierta al acercar un iPhone o Apple Watch con tu cuenta."),
               kind: .toggle, caveat: nil),
-        .init(key: "lidwake", title: "Despertar al abrir la tapa", description: "Solo en portátiles.",
+        .init(key: "lidwake", title: L("Despertar al abrir la tapa"), description: L("Solo en portátiles."),
               kind: .toggle, caveat: nil),
-        .init(key: "autorestart", title: "Arrancar tras un corte de luz", description: "Enciende el Mac solo cuando vuelve la corriente.",
+        .init(key: "autorestart", title: L("Arrancar tras un corte de luz"), description: L("Enciende el Mac solo cuando vuelve la corriente."),
               kind: .toggle, caveat: nil),
-        .init(key: "ttyskeepawake", title: "No dormir con sesiones remotas", description: "Evita el reposo mientras hay una sesión de terminal remota (ssh) activa.",
+        .init(key: "ttyskeepawake", title: L("No dormir con sesiones remotas"), description: L("Evita el reposo mientras hay una sesión de terminal remota (ssh) activa."),
               kind: .toggle, caveat: nil),
     ]
 
@@ -192,7 +192,7 @@ public enum Spotlight {
         do { try p.run() } catch { return (nil, error.localizedDescription) }
         if done.wait(timeout: .now() + timeout) == .timedOut {
             p.terminate()
-            return (nil, "El disco no responde (¿está dormido o desconectándose?)")
+            return (nil, L("El disco no responde (¿está dormido o desconectándose?)"))
         }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         return parseStatus(String(decoding: data, as: UTF8.self))
@@ -200,10 +200,10 @@ public enum Spotlight {
 
     public static func parseStatus(_ text: String) -> (indexing: Bool?, detail: String) {
         let t = text.lowercased()
-        if t.contains("indexing enabled") { return (true, "Indexando") }
-        if t.contains("indexing disabled") { return (false, "Indexación desactivada") }
-        if t.contains("indexing and searching disabled") { return (false, "Indexación y búsqueda desactivadas") }
+        if t.contains("indexing enabled") { return (true, L("Indexando")) }
+        if t.contains("indexing disabled") { return (false, L("Indexación desactivada")) }
+        if t.contains("indexing and searching disabled") { return (false, L("Indexación y búsqueda desactivadas")) }
         let last = text.split(separator: "\n").last.map { $0.trimmingCharacters(in: .whitespaces) } ?? ""
-        return (nil, last.isEmpty ? "Estado desconocido" : last)
+        return (nil, last.isEmpty ? L("Estado desconocido") : last)
     }
 }

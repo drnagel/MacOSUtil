@@ -75,14 +75,14 @@ public enum StartupScanner {
 
     static func schedule(_ plist: [String: Any], daemon: Bool) -> [String] {
         var s: [String] = []
-        if plist["RunAtLoad"] as? Bool == true { s.append(daemon ? "Al arrancar el Mac" : "Al iniciar sesión") }
+        if plist["RunAtLoad"] as? Bool == true { s.append(daemon ? L("Al arrancar el Mac") : L("Al iniciar sesión")) }
         if let k = plist["KeepAlive"] {
-            if (k as? Bool) == true || k is [String: Any] { s.append("Siempre activo") }
+            if (k as? Bool) == true || k is [String: Any] { s.append(L("Siempre activo")) }
         }
-        if let i = plist["StartInterval"] as? Int { s.append("Cada \(duration(i))") }
-        if plist["StartCalendarInterval"] != nil { s.append("Programado") }
-        if plist["WatchPaths"] != nil || plist["QueueDirectories"] != nil { s.append("Al cambiar archivos") }
-        if plist["MachServices"] != nil && s.isEmpty { s.append("Bajo demanda") }
+        if let i = plist["StartInterval"] as? Int { s.append(L("Cada \(duration(i))")) }
+        if plist["StartCalendarInterval"] != nil { s.append(L("Programado")) }
+        if plist["WatchPaths"] != nil || plist["QueueDirectories"] != nil { s.append(L("Al cambiar archivos")) }
+        if plist["MachServices"] != nil && s.isEmpty { s.append(L("Bajo demanda")) }
         return s
     }
 

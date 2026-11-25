@@ -1,4 +1,5 @@
 import Foundation
+import CatalogText
 
 /// Un perfil del asistente: un conjunto de ajustes y apps pensado para un tipo de uso.
 /// `Catalog/profiles/<perfil>.json`. Referencia ajustes y apps por id.
@@ -13,6 +14,19 @@ public struct Profile: Codable, Identifiable, Hashable, Sendable {
     public let tweaks: [String]
     /// Ids de apps del catálogo (token del cask o `mas-<id>`).
     public let apps: [String]
+
+    enum CodingKeys: String, CodingKey { case id, title, description, icon, order, tweaks, apps }
+
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeLocalized(forKey: .title)
+        description = try c.decodeLocalized(forKey: .description)
+        icon = try c.decode(String.self, forKey: .icon)
+        order = try c.decode(Int.self, forKey: .order)
+        tweaks = try c.decode([String].self, forKey: .tweaks)
+        apps = try c.decode([String].self, forKey: .apps)
+    }
 
     public init(id: String, title: String, description: String, icon: String, order: Int, tweaks: [String], apps: [String]) {
         self.id = id; self.title = title; self.description = description; self.icon = icon
@@ -38,12 +52,12 @@ public enum ProfileCatalog {
         var problems: [String] = []
         var ids: Set<String> = []
         for p in profiles {
-            if !ids.insert(p.id).inserted { problems.append("\(p.id): perfil repetido") }
-            if p.tweaks.isEmpty && p.apps.isEmpty { problems.append("\(p.id): perfil vacío") }
-            for t in p.tweaks where !tweakIDs.contains(t) { problems.append("\(p.id): ajuste desconocido «\(t)»") }
-            for a in p.apps where !appIDs.contains(a) { problems.append("\(p.id): app desconocida «\(a)»") }
-            if Set(p.tweaks).count != p.tweaks.count { problems.append("\(p.id): ajustes repetidos") }
-            if Set(p.apps).count != p.apps.count { problems.append("\(p.id): apps repetidas") }
+            if !ids.insert(p.id).inserted { problems.append(L("\(p.id): perfil repetido")) }
+            if p.tweaks.isEmpty && p.apps.isEmpty { problems.append(L("\(p.id): perfil vacío")) }
+            for t in p.tweaks where !tweakIDs.contains(t) { problems.append(L("\(p.id): ajuste desconocido «\(t)»")) }
+            for a in p.apps where !appIDs.contains(a) { problems.append(L("\(p.id): app desconocida «\(a)»")) }
+            if Set(p.tweaks).count != p.tweaks.count { problems.append(L("\(p.id): ajustes repetidos")) }
+            if Set(p.apps).count != p.apps.count { problems.append(L("\(p.id): apps repetidas")) }
         }
         return problems
     }
@@ -89,10 +103,10 @@ public struct SetupFile: Codable, Sendable, Equatable {
         dec.dateDecodingStrategy = .iso8601
         let file: SetupFile
         do { file = try dec.decode(SetupFile.self, from: data) } catch {
-            throw ProfileError.invalid("No es un archivo de configuración de MacOSUtil.")
+            throw ProfileError.invalid(L("No es un archivo de configuración de MacOSUtil."))
         }
-        guard file.format == format else { throw ProfileError.invalid("Formato desconocido: \(file.format)") }
-        guard file.version <= 1 else { throw ProfileError.invalid("Archivo de una versión más nueva de MacOSUtil (v\(file.version)).") }
+        guard file.format == format else { throw ProfileError.invalid(L("Formato desconocido: \(file.format)")) }
+        guard file.version <= 1 else { throw ProfileError.invalid(L("Archivo de una versión más nueva de MacOSUtil (v\(file.version)).")) }
         return file
     }
 

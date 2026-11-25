@@ -32,8 +32,8 @@ public final class TweakEngine: @unchecked Sendable {
     // MARK: Comprobar
 
     public func status(_ t: Tweak) -> TweakStatus {
-        if !t.isCompatible { return .unavailable("No probado en esta versión de macOS") }
-        if t.admin { return .unavailable("Necesita administrador (Fase 2)") }
+        if !t.isCompatible { return .unavailable(L("No probado en esta versión de macOS")) }
+        if t.admin { return .unavailable(L("Necesita permisos de administrador")) }
         var matches = 0
         for case .defaults(let a) in t.actions {
             if case .value(let v) = Preferences.read(a), v.matches(a.value) { matches += 1 }

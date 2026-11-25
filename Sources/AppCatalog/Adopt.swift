@@ -65,7 +65,7 @@ public enum Adopt {
 
 extension Homebrew {
     public static func adopt(_ plan: Adopt.Plan, onLine: (@Sendable (String) -> Void)? = nil) async -> RunResult {
-        guard isValidToken(plan.token) else { return RunResult(status: -1, output: "Token no válido") }
+        guard isValidToken(plan.token) else { return RunResult(status: -1, output: L("Token no válido")) }
         return await run(plan.arguments, onLine: onLine)
     }
 }

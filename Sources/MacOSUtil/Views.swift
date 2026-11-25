@@ -168,11 +168,12 @@ struct TweakRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(tweak.title)
-                        if pending { Tag(text: "Pendiente", color: .accentColor) }
-                        if status == .partial { Tag(text: "Parcial", color: .orange) }
-                        if tweak.risk > .low { Tag(text: "Riesgo \(tweak.risk.title.lowercased())", color: .orange) }
-                        if tweak.logout { Tag(text: "Cerrar sesión", color: .secondary) }
-                        if app.engine.isManaged(tweak) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
+                        if pending { Tag(text: L("Pendiente"), color: .accentColor) }
+                        if status == .partial { Tag(text: L("Parcial"), color: .orange) }
+                        if tweak.risk > .low { Tag(text: tweak.risk == .high ? L("Riesgo alto") : L("Riesgo medio"), color: .orange) }
+                        if tweak.logout { Tag(text: L("Cerrar sesión"), color: .secondary) }
+                        if tweak.isUntestedHere { Tag(text: L("No probado en macOS \(ProcessInfo.processInfo.operatingSystemVersion.majorVersion)"), color: .orange) }
+                        if app.engine.isManaged(tweak) { Tag(text: L("Cambiado por MacOSUtil"), color: .green) }
                     }
                     Text(tweak.description).font(.uiCallout).foregroundStyle(.secondary)
                     if case .unavailable(let why) = status {
@@ -205,6 +206,9 @@ struct TweakRow: View {
                     if !tweak.restart.isEmpty {
                         Text("Reinicia: \(tweak.restart.joined(separator: ", "))").font(.uiCaption).foregroundStyle(.secondary)
                     }
+                    if let tested = tweak.tested {
+                        Text("Probado hasta macOS \(tested)").font(.uiCaption).foregroundStyle(.secondary)
+                    }
                 }
                 .padding(.leading, 18)
             }
@@ -219,9 +223,9 @@ struct TweakRow: View {
 
     private func describe(_ s: Preferences.Stored) -> String {
         switch s {
-        case .absent: "sin definir (valor de fábrica)"
+        case .absent: L("sin definir (valor de fábrica)")
         case .value(let v): v.description
-        case .unsupported(let type): "valor de tipo \(type)"
+        case .unsupported(let type): L("valor de tipo \(type)")
         }
     }
 }
@@ -279,21 +283,21 @@ struct DiskView: View {
     @State private var spotlight = SpotlightModel()
 
     private static let shortcuts: [(title: String, detail: String, icon: String, tab: String)] = [
-        ("Qué ocupa espacio", "Los archivos más grandes del Mac", "doc.badge.ellipsis", "large"),
-        ("Limpieza", "Cachés, registros, papelera y restos de desarrollo", "sparkles", "cleanup"),
-        ("Apps y sus restos", "Lo que ocupa cada app y lo que dejan las borradas", "app.badge.checkmark", "apps"),
-        ("Duplicados", "Archivos repetidos", "doc.on.doc", "duplicates"),
-        ("Qué creció", "Cambios desde el último análisis", "chart.line.uptrend.xyaxis", "changes"),
+        (L("Qué ocupa espacio"), L("Los archivos más grandes del Mac"), "doc.badge.ellipsis", "large"),
+        (L("Limpieza"), L("Cachés, registros, papelera y restos de desarrollo"), "sparkles", "cleanup"),
+        (L("Apps y sus restos"), L("Lo que ocupa cada app y lo que dejan las borradas"), "app.badge.checkmark", "apps"),
+        (L("Duplicados"), L("Archivos repetidos"), "doc.on.doc", "duplicates"),
+        (L("Qué creció"), L("Cambios desde el último análisis"), "chart.line.uptrend.xyaxis", "changes"),
     ]
 
     /// Carpetas que suelen crecer sin que nadie se dé cuenta. Solo se muestran las que existen.
     private static var folders: [(title: String, path: String)] {
         let home = NSHomeDirectory()
         return [
-            ("Descargas", home + "/Downloads"),
-            ("Cachés de apps", home + "/Library/Caches"),
-            ("Xcode y simuladores", home + "/Library/Developer"),
-            ("Contenedores de apps", home + "/Library/Containers"),
+            (L("Descargas"), home + "/Downloads"),
+            (L("Cachés de apps"), home + "/Library/Caches"),
+            (L("Xcode y simuladores"), home + "/Library/Developer"),
+            (L("Contenedores de apps"), home + "/Library/Containers"),
         ].filter { FileManager.default.fileExists(atPath: $0.1) }
     }
 
@@ -309,7 +313,7 @@ struct DiskView: View {
             if diskTree == nil {
                 Section("Analizar y liberar espacio") {
                     Text("DiskTree no está instalada.")
-                    Text("En ~/ClaudeCode/DiskTreeMac ejecuta Scripts/build.sh --install")
+                    Text("Compila e instala DiskTree y vuelve a comprobar.")
                         .font(.uiMono).foregroundStyle(.secondary).textSelection(.enabled)
                 }
             } else if !links {
@@ -318,7 +322,7 @@ struct DiskView: View {
                 } header: {
                     Text("Analizar y liberar espacio")
                 } footer: {
-                    Text("Esta versión de DiskTree no admite enlaces directos. Recompílala con Scripts/build.sh --install para saltar a cada sección desde aquí.").footerStyle()
+                    Text("Esta versión de DiskTree no admite enlaces directos. Actualízala para saltar a cada sección desde aquí.").footerStyle()
                 }
             } else {
                 Section {

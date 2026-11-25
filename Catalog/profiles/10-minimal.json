@@ -1,14 +1,26 @@
 {
   "id": "minimal",
-  "title": "Básico recomendado",
-  "description": "Los cambios que casi todo el mundo agradece: Finder más claro, Dock sin ruido, diálogos completos y menos anuncios. Pocas apps, todas ligeras.",
+  "title": { "en": "Recommended basics", "es": "Básico recomendado" },
+  "description": { "en": "The changes almost everyone appreciates: a clearer Finder, a quieter Dock, full dialogs and fewer ads. A few apps, all lightweight.", "es": "Los cambios que casi todo el mundo agradece: Finder más claro, Dock sin ruido, diálogos completos y menos anuncios. Pocas apps, todas ligeras." },
   "icon": "sparkles",
   "order": 10,
   "tweaks": [
-    "finder.show-extensions", "finder.path-bar", "finder.status-bar", "finder.folders-first", "finder.search-current-folder",
-    "dock.no-recents", "dock.minimize-to-app",
-    "interface.expanded-save-panel", "interface.expanded-print-panel",
+    "finder.show-extensions",
+    "finder.path-bar",
+    "finder.status-bar",
+    "finder.folders-first",
+    "finder.search-current-folder",
+    "dock.no-recents",
+    "dock.minimize-to-app",
+    "interface.expanded-save-panel",
+    "interface.expanded-print-panel",
     "privacy.no-personalized-ads"
   ],
-  "apps": ["rectangle", "maccy", "the-unarchiver", "iina", "pearcleaner"]
+  "apps": [
+    "rectangle",
+    "maccy",
+    "the-unarchiver",
+    "iina",
+    "pearcleaner"
+  ]
 }

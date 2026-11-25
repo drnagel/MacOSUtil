@@ -1,50 +1,116 @@
 {
   "id": "dock",
-  "title": "Dock",
+  "title": { "en": "Dock", "es": "Dock" },
   "icon": "dock.rectangle",
   "order": 20,
   "tweaks": [
     {
       "id": "dock.autohide",
-      "title": "Ocultar el Dock automáticamente",
-      "description": "El Dock se esconde y aparece al llevar el puntero al borde de la pantalla.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "autohide", "valueType": "bool", "value": true }],
-      "restart": ["Dock"]
+      "title": { "en": "Automatically hide the Dock", "es": "Ocultar el Dock automáticamente" },
+      "description": { "en": "The Dock hides and shows up when you move the pointer to the edge of the screen.", "es": "El Dock se esconde y aparece al llevar el puntero al borde de la pantalla." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "autohide",
+          "valueType": "bool",
+          "value": true
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     },
     {
       "id": "dock.no-autohide-delay",
-      "title": "Mostrar el Dock sin espera",
-      "description": "Quita el medio segundo de espera antes de que aparezca el Dock oculto.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "autohide-delay", "valueType": "float", "value": 0 }],
-      "restart": ["Dock"]
+      "title": { "en": "Show the Dock instantly", "es": "Mostrar el Dock sin espera" },
+      "description": { "en": "Removes the half-second delay before the hidden Dock appears.", "es": "Quita el medio segundo de espera antes de que aparezca el Dock oculto." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "autohide-delay",
+          "valueType": "float",
+          "value": 0
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     },
     {
       "id": "dock.fast-animation",
-      "title": "Animación del Dock más rápida",
-      "description": "El Dock oculto aparece y desaparece en la mitad de tiempo.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "autohide-time-modifier", "valueType": "float", "value": 0.25 }],
-      "restart": ["Dock"]
+      "title": { "en": "Faster Dock animation", "es": "Animación del Dock más rápida" },
+      "description": { "en": "The hidden Dock shows and hides in half the time.", "es": "El Dock oculto aparece y desaparece en la mitad de tiempo." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "autohide-time-modifier",
+          "valueType": "float",
+          "value": 0.25
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     },
     {
       "id": "dock.no-recents",
-      "title": "Sin apps recientes en el Dock",
-      "description": "Quita la sección de apps usadas hace poco que aparece al final del Dock.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "show-recents", "valueType": "bool", "value": false }],
-      "restart": ["Dock"]
+      "title": { "en": "No recent apps in the Dock", "es": "Sin apps recientes en el Dock" },
+      "description": { "en": "Removes the recently used apps section at the end of the Dock.", "es": "Quita la sección de apps usadas hace poco que aparece al final del Dock." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "show-recents",
+          "valueType": "bool",
+          "value": false
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     },
     {
       "id": "dock.minimize-to-app",
-      "title": "Minimizar en el icono de la app",
-      "description": "Las ventanas minimizadas van al icono de su app en lugar de ocupar sitio en el Dock.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "minimize-to-application", "valueType": "bool", "value": true }],
-      "restart": ["Dock"]
+      "title": { "en": "Minimize into the app icon", "es": "Minimizar en el icono de la app" },
+      "description": { "en": "Minimized windows go into their app's icon instead of taking up room in the Dock.", "es": "Las ventanas minimizadas van al icono de su app en lugar de ocupar sitio en el Dock." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "minimize-to-application",
+          "valueType": "bool",
+          "value": true
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     },
     {
       "id": "dock.fixed-spaces",
-      "title": "No reordenar los escritorios",
-      "description": "Los escritorios (Spaces) mantienen su orden en lugar de reordenarse según el uso.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.dock", "key": "mru-spaces", "valueType": "bool", "value": false }],
-      "restart": ["Dock"]
+      "title": { "en": "Don't rearrange Spaces", "es": "No reordenar los escritorios" },
+      "description": { "en": "Desktops (Spaces) keep their order instead of rearranging based on recent use.", "es": "Los escritorios (Spaces) mantienen su orden en lugar de reordenarse según el uso." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.dock",
+          "key": "mru-spaces",
+          "valueType": "bool",
+          "value": false
+        }
+      ],
+      "restart": [
+        "Dock"
+      ]
     }
   ]
 }

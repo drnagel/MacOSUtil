@@ -50,7 +50,13 @@ final class AppsModel {
     }
 
     func canSelect(_ a: AppEntry) -> Bool {
-        a.cask != nil && status(a) == .notInstalled && brewInstalled && !isRunning
+        a.cask != nil && status(a) == .notInstalled && brewInstalled && !isRunning && requiredMacOS(a) == nil
+    }
+
+    /// Versión mayor de macOS que pide la app si este Mac no la cumple; nil si es compatible o no se sabe.
+    func requiredMacOS(_ a: AppEntry) -> Int? {
+        guard let i = a.cask.flatMap({ info[$0] }), i.isTooNew() else { return nil }
+        return i.minMacOS
     }
 
     func toggle(_ a: AppEntry) {
@@ -93,14 +99,14 @@ final class AppsModel {
         let admin = apps.filter { needsAdmin($0) }
         if !admin.isEmpty {
             Homebrew.openInTerminal(admin.compactMap(\.cask).map { ["install", "--cask", $0] },
-                                    title: "MacOSUtil: instalando \(admin.map(\.name).joined(separator: ", ")) (pide contraseña)")
+                                    title: L("MacOSUtil: instalando \(admin.map(\.name).joined(separator: ", ")) (pide contraseña)"))
         }
         selected = []
         guard !direct.isEmpty else {
             if !admin.isEmpty { banner = .init(text: adminNote(admin), isError: false) }
             return
         }
-        runJobs(direct.map { a in ("Instalando \(a.name)", { await Homebrew.install(a.cask!, onLine: $0) }) },
+        runJobs(direct.map { a in (L("Instalando \(a.name)"), { await Homebrew.install(a.cask!, onLine: $0) }) },
                 note: admin.isEmpty ? nil : adminNote(admin))
     }
 
@@ -109,20 +115,20 @@ final class AppsModel {
         let admin = list.filter { needsAdmin($0) }
         if !admin.isEmpty {
             Homebrew.openInTerminal(admin.compactMap(\.cask).map { ["upgrade", "--cask", $0] },
-                                    title: "MacOSUtil: actualizando \(admin.map(\.name).joined(separator: ", "))")
+                                    title: L("MacOSUtil: actualizando \(admin.map(\.name).joined(separator: ", "))"))
         }
         let direct = list.filter { !needsAdmin($0) }
         guard !direct.isEmpty else { return }
-        runJobs(direct.map { a in ("Actualizando \(a.name)", { await Homebrew.upgrade(a.cask!, onLine: $0) }) }, note: nil)
+        runJobs(direct.map { a in (L("Actualizando \(a.name)"), { await Homebrew.upgrade(a.cask!, onLine: $0) }) }, note: nil)
     }
 
     func uninstall(_ a: AppEntry) {
         guard let token = a.cask else { return }
         if needsAdmin(a) {
-            Homebrew.openInTerminal([["uninstall", "--cask", token]], title: "MacOSUtil: desinstalando \(a.name)")
+            Homebrew.openInTerminal([["uninstall", "--cask", token]], title: L("MacOSUtil: desinstalando \(a.name)"))
             return
         }
-        runJobs([("Desinstalando \(a.name)", { await Homebrew.uninstall(token, onLine: $0) })], note: nil)
+        runJobs([(L("Desinstalando \(a.name)"), { await Homebrew.uninstall(token, onLine: $0) })], note: nil)
     }
 
     // MARK: Pasar a Homebrew
@@ -149,16 +155,16 @@ final class AppsModel {
         let direct = plans.filter { !$0.1.needsTerminal }
         if !terminal.isEmpty {
             Homebrew.openInTerminal(terminal.map { $0.1.arguments },
-                                    title: "MacOSUtil: pasando a Homebrew \(terminal.map(\.0.name).joined(separator: ", ")) (pide contraseña)")
+                                    title: L("MacOSUtil: pasando a Homebrew \(terminal.map(\.0.name).joined(separator: ", ")) (pide contraseña)"))
         }
         let note = terminal.isEmpty ? nil
-            : "\(terminal.map(\.0.name).joined(separator: ", ")) se pasa a Homebrew en Terminal porque su instalador pide tu contraseña. Cuando termine, pulsa «Volver a comprobar»."
+            : L("\(terminal.map(\.0.name).joined(separator: ", ")) se pasa a Homebrew en Terminal porque su instalador pide tu contraseña. Cuando termine, pulsa «Volver a comprobar».")
         guard !direct.isEmpty else {
             if let note { banner = .init(text: note, isError: false) }
             return
         }
         runJobs(direct.map { a, plan in
-            ("\(plan.mode == .adopt ? "Adoptando" : "Pasando a Homebrew") \(a.name)", { await Homebrew.adopt(plan, onLine: $0) })
+            (plan.mode == .adopt ? L("Adoptando \(a.name)") : L("Pasando a Homebrew \(a.name)"), { await Homebrew.adopt(plan, onLine: $0) })
         }, note: note)
     }
 
@@ -171,8 +177,7 @@ final class AppsModel {
     }
 
     private func adminNote(_ apps: [AppEntry]) -> String {
-        "\(apps.map(\.name).joined(separator: ", ")) se instala en Terminal porque pide tu contraseña de administrador. "
-            + "Cuando termine, pulsa «Volver a comprobar»."
+        L("\(apps.map(\.name).joined(separator: ", ")) se instala en Terminal porque pide tu contraseña de administrador. Cuando termine, pulsa «Volver a comprobar».")
     }
 
     private typealias Job = (title: String, run: (@escaping @Sendable (String) -> Void) async -> Homebrew.RunResult)
@@ -184,8 +189,8 @@ final class AppsModel {
             let results = await executeJobs(jobs)
             let failed = zip(jobs, results).filter { !$1 }.map(\.0.title)
             let done = results.filter { $0 }.count
-            var text = done == 1 ? "1 tarea completada." : "\(done) tareas completadas."
-            if !failed.isEmpty { text += "\nCon error: \(failed.joined(separator: ", ")). Mira el registro para ver el motivo." }
+            var text = done == 1 ? L("1 tarea completada.") : L("\(done) tareas completadas.")
+            if !failed.isEmpty { text += "\n" + L("Con error: \(failed.joined(separator: ", ")). Mira el registro para ver el motivo.") }
             if let note { text += "\n\n" + note }
             banner = .init(text: text, isError: !failed.isEmpty)
             refresh()
@@ -229,11 +234,11 @@ final class AppsModel {
         let direct = list.filter { !needsAdmin($0) }
         if !admin.isEmpty {
             Homebrew.openInTerminal(admin.compactMap(\.cask).map { ["install", "--cask", $0] },
-                                    title: "MacOSUtil: instalando \(admin.map(\.name).joined(separator: ", ")) (pide contraseña)")
+                                    title: L("MacOSUtil: instalando \(admin.map(\.name).joined(separator: ", ")) (pide contraseña)"))
             outcome.inTerminal = admin.map(\.name)
         }
         guard !direct.isEmpty, !isRunning else { return outcome }
-        let results = await executeJobs(direct.map { a in ("Instalando \(a.name)", { await Homebrew.install(a.cask!, onLine: $0) }) })
+        let results = await executeJobs(direct.map { a in (L("Instalando \(a.name)"), { await Homebrew.install(a.cask!, onLine: $0) }) })
         for (a, ok) in zip(direct, results) { if ok { outcome.installed.append(a.name) } else { outcome.failed.append(a.name) } }
         refresh()
         return outcome

@@ -9,9 +9,15 @@ BUNDLE_ID="local.macosutil.MacOSUtil"
 VERSION="0.1.0"
 APP="build/${APP_NAME}.app"
 
+# El compilador deja en .build/loc los textos traducibles de cada archivo (.stringsdata); no se borra entre
+# compilaciones porque solo se regeneran los de los archivos que cambian.
+LOC_DIR="$PWD/.build/loc"
+mkdir -p "$LOC_DIR"
+SWIFT_FLAGS=(-c release -Xswiftc -emit-localized-strings -Xswiftc -emit-localized-strings-path -Xswiftc "$LOC_DIR")
+
 echo "→ Compilando (release)…"
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/${APP_NAME}"
+swift build "${SWIFT_FLAGS[@]}"
+BIN="$(swift build "${SWIFT_FLAGS[@]}" --show-bin-path)/${APP_NAME}"
 
 echo "→ Empaquetando ${APP}"
 rm -rf "$APP"
@@ -19,6 +25,10 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/${APP_NAME}"
 # El catálogo viaja dentro de la app; el motor lo busca en Contents/Resources/Catalog.
 cp -R Catalog "$APP/Contents/Resources/Catalog"
+
+# Idiomas: inglés (base) y español. Falla si falta alguna traducción en Localization/en.json.
+echo "→ Generando idiomas"
+swift Scripts/localize.swift "$LOC_DIR" Localization/en.json "$APP/Contents/Resources"
 
 # Icono: se regenera con Scripts/make_icon.sh si falta o si cambió el dibujo.
 if [[ ! -f Resources/AppIcon.icns || Scripts/make_icon.swift -nt Resources/AppIcon.icns ]]; then
@@ -40,7 +50,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleShortVersionString</key><string>${VERSION}</string>
   <key>CFBundleVersion</key><string>$(date +%Y%m%d%H%M)</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
-  <key>CFBundleDevelopmentRegion</key><string>es</string>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>es</string></array>
   <key>LSMinimumSystemVersion</key><string>15.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
   <key>NSHighResolutionCapable</key><true/>

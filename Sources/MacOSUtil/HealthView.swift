@@ -70,19 +70,19 @@ struct HealthView: View {
     }
 
     private func summaryTitle(_ m: HealthModel) -> String {
-        if m.checks.isEmpty { return "Comprobando…" }
+        if m.checks.isEmpty { return L("Comprobando…") }
         let bad = m.checks.filter { $0.status == .bad }.count
         let warn = m.checks.filter { $0.status == .warning }.count
-        if bad == 0 && warn == 0 { return "Todo en orden" }
+        if bad == 0 && warn == 0 { return L("Todo en orden") }
         var parts: [String] = []
-        if bad > 0 { parts.append("\(bad) \(bad == 1 ? "problema" : "problemas")") }
-        if warn > 0 { parts.append("\(warn) \(warn == 1 ? "aviso" : "avisos")") }
-        return parts.joined(separator: " y ")
+        if bad > 0 { parts.append(bad == 1 ? L("1 problema") : L("\(bad) problemas")) }
+        if warn > 0 { parts.append(warn == 1 ? L("1 aviso") : L("\(warn) avisos")) }
+        return parts.joined(separator: L(" y "))
     }
 
     private func summaryDetail(_ m: HealthModel) -> String {
-        guard let at = m.checkedAt else { return "Seguridad, actualizaciones, copias de seguridad, discos y sistema." }
-        return "Comprobado a las \(at.formatted(date: .omitted, time: .shortened)). Solo se lee: aquí no se cambia nada. Pulsa ⌘R para volver a comprobar."
+        guard let at = m.checkedAt else { return L("Seguridad, actualizaciones, copias de seguridad, discos y sistema.") }
+        return L("Comprobado a las \(at.formatted(date: .omitted, time: .shortened)). Solo se lee: aquí no se cambia nada. Pulsa ⌘R para volver a comprobar.")
     }
 }
 

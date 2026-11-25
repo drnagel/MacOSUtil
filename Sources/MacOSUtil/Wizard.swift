@@ -12,11 +12,11 @@ final class WizardModel: Identifiable {
 
         var title: String {
             switch self {
-            case .profile: "Perfil"
-            case .tweaks: "Ajustes"
-            case .apps: "Apps"
-            case .summary: "Resumen"
-            case .applying, .done: "Aplicar"
+            case .profile: L("Perfil")
+            case .tweaks: L("Ajustes")
+            case .apps: L("Apps")
+            case .summary: L("Resumen")
+            case .applying, .done: L("Aplicar")
             }
         }
     }
@@ -49,8 +49,8 @@ final class WizardModel: Identifiable {
 
     var sourceTitle: String {
         if let profile { return profile.title }
-        if importedFrom != nil { return "Configuración importada" }
-        return "Personalizado"
+        if importedFrom != nil { return L("Configuración importada") }
+        return L("Personalizado")
     }
 
     func choose(_ p: Profile?) {
@@ -80,7 +80,7 @@ final class WizardModel: Identifiable {
     }
 
     func isInstallable(_ a: AppEntry) -> Bool {
-        a.cask != nil && root.apps.brewInstalled && root.apps.status(a) == .notInstalled
+        a.cask != nil && root.apps.brewInstalled && root.apps.status(a) == .notInstalled && root.apps.requiredMacOS(a) == nil
     }
 
     var restarts: [String] {
@@ -165,7 +165,7 @@ struct WizardView: View {
             Image(systemName: "wand.and.stars").font(.uiTitle2).foregroundStyle(Color.accentColor)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Asistente de configuración").font(.uiHeadline)
-                Text(model.step == .profile ? "Elige un punto de partida" : model.sourceTitle)
+                Text(model.step == .profile ? L("Elige un punto de partida") : model.sourceTitle)
                     .font(.uiCallout).foregroundStyle(.secondary)
             }
             Spacer()
@@ -283,9 +283,10 @@ private struct TweakStep: View {
                                 set: { on in if on { model.tweakSelection.insert(t.id) } else { model.tweakSelection.remove(t.id) } })) {
                                 HStack(spacing: 6) {
                                     Text(t.title)
-                                    if already { Tag(text: "Ya activado", color: .green) }
-                                    if t.risk > .low { Tag(text: "Riesgo \(t.risk.title.lowercased())", color: .orange) }
-                                    if t.logout { Tag(text: "Cerrar sesión", color: .secondary) }
+                                    if already { Tag(text: L("Ya activado"), color: .green) }
+                                    if t.risk > .low { Tag(text: t.risk == .high ? L("Riesgo alto") : L("Riesgo medio"), color: .orange) }
+                                    if t.logout { Tag(text: L("Cerrar sesión"), color: .secondary) }
+                                    if t.isUntestedHere { Tag(text: L("No probado en macOS \(ProcessInfo.processInfo.operatingSystemVersion.majorVersion)"), color: .orange) }
                                 }
                             }
                             .toggleStyle(.checkbox)
@@ -324,9 +325,10 @@ private struct AppStep: View {
                             set: { on in if on { model.appSelection.insert(a.id) } else { model.appSelection.remove(a.id) } })) {
                             HStack(spacing: 6) {
                                 Text(a.name)
-                                if installed { Tag(text: "Ya instalada", color: .green) }
-                                if a.appStore != nil { Tag(text: "Solo App Store", color: .blue) }
-                                if apps.needsAdmin(a) { Tag(text: "Pide contraseña", color: .secondary) }
+                                if installed { Tag(text: L("Ya instalada"), color: .green) }
+                                if a.appStore != nil { Tag(text: L("Solo App Store"), color: .blue) }
+                                if apps.needsAdmin(a) { Tag(text: L("Pide contraseña"), color: .secondary) }
+                                if let v = apps.requiredMacOS(a) { Tag(text: L("Requiere macOS \(v) o posterior"), color: .red) }
                             }
                         }
                         .toggleStyle(.checkbox)
@@ -398,7 +400,7 @@ private struct ApplyingStep: View {
             if model.tweakResult == nil {
                 Text("Aplicando ajustes…")
             } else {
-                Text(apps.currentTask ?? "Preparando apps…")
+                Text(apps.currentTask ?? L("Preparando apps…"))
                 Text(apps.log.last ?? "").font(.uiMono).foregroundStyle(.secondary)
                     .lineLimit(1).truncationMode(.middle).frame(maxWidth: 600)
             }
@@ -416,18 +418,18 @@ private struct DoneStep: View {
         let hadErrors = !tr.failed.isEmpty || !ao.failed.isEmpty
         Form {
             Section {
-                Label(hadErrors ? "Terminado con algunos problemas" : "Configuración aplicada",
+                Label(hadErrors ? L("Terminado con algunos problemas") : L("Configuración aplicada"),
                       systemImage: hadErrors ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                     .font(.uiTitle3).foregroundStyle(hadErrors ? .orange : .green)
             }
             Section("Ajustes") {
-                Text(tr.changed.count == 1 ? "1 ajuste activado." : "\(tr.changed.count) ajustes activados.")
+                Text(tr.changed.count == 1 ? L("1 ajuste activado.") : L("\(tr.changed.count) ajustes activados."))
                 ForEach(tr.failed, id: \.id) { f in Text("✗ \(f.error)").foregroundStyle(.red).font(.uiCallout) }
                 if !tr.restarted.isEmpty { Text("Reiniciado: \(tr.restarted.joined(separator: ", ")).").font(.uiCallout).foregroundStyle(.secondary) }
                 if tr.needsLogout { Text("Cierra sesión cuando puedas para que todos los cambios se apliquen del todo.").font(.uiCallout) }
             }
             Section("Apps") {
-                Text(ao.installed.isEmpty ? "No se instaló ninguna app." : "Instaladas: \(ao.installed.joined(separator: ", ")).")
+                Text(ao.installed.isEmpty ? L("No se instaló ninguna app.") : L("Instaladas: \(ao.installed.joined(separator: ", ")).")) 
                 if !ao.failed.isEmpty {
                     Text("Con error: \(ao.failed.joined(separator: ", ")). Mira el registro en la sección Apps.").foregroundStyle(.red).font(.uiCallout)
                 }

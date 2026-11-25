@@ -1,6 +1,10 @@
 import Foundation
 import Privileged
 import Health
+import CatalogUpdate
+import CatalogText
+import CryptoKit
+import Profiles
 import TweakEngine
 import AppCatalog
 import Startup
@@ -289,6 +293,45 @@ enum SelfTest {
         let healthLive = HealthScanner.run()
         check(!healthLive.isEmpty && Set(healthLive.map(\.id)).count == healthLive.count, "comprobaciones en este Mac: \(healthLive.count) en \(String(format: "%.1f", Date().timeIntervalSince(t0))) s")
         for c in healthLive where c.status >= .warning { print("    ⚠︎ \(c.title): \(c.detail)") }
+
+        print("== Idiomas y catálogo firmado")
+        check(CatalogLanguage.pick(["en": "Hello", "es": "Hola"]) == (CatalogLanguage.current == "es" ? "Hola" : "Hello")
+              && CatalogLanguage.pick(["es": "Solo"]) == "Solo", "elige el idioma de la app, con inglés y luego cualquiera de reserva (ahora: \(CatalogLanguage.current))")
+        let profileJSON = #"{"id":"x","title":{"en":"Basics","es":"Básico"},"description":"plain","icon":"star","order":1,"tweaks":["a"],"apps":[]}"#
+        let decoded = try? JSONDecoder().decode(Profile.self, from: Data(profileJSON.utf8))
+        check(decoded?.title == (CatalogLanguage.current == "es" ? "Básico" : "Basics") && decoded?.description == "plain",
+              "lee textos bilingües y simples del catálogo")
+        check(Tweak.isUntested(tested: "27", onMajor: 28) && !Tweak.isUntested(tested: "27", onMajor: 27) && !Tweak.isUntested(tested: nil, onMajor: 30),
+              "compatibilidad: avisa solo en versiones más nuevas que la probada")
+        check(CaskInfo(token: "x", version: "1", installed: nil, outdated: false, appPaths: [], needsAdmin: false, minMacOS: 30).isTooNew(forMajor: 27)
+              && !CaskInfo(token: "x", version: "1", installed: nil, outdated: false, appPaths: [], needsAdmin: false, minMacOS: 14).isTooNew(forMajor: 27),
+              "apps: detecta si piden un macOS más nuevo")
+        let catDir = dir
+        let catProblems = CatalogBundle.validate(dir: catDir)
+        check(catProblems.isEmpty, "catálogo completo y traducido (en/es)" + (catProblems.isEmpty ? "" : ": " + catProblems.prefix(3).joined(separator: " · ")))
+        let testKey = Curve25519.Signing.PrivateKey()
+        let testPub = testKey.publicKey.rawRepresentation.base64EncodedString()
+        if let bundle = try? CatalogBundle.make(from: catDir), let data = try? bundle.encoded(), let sig = try? CatalogBundle.sign(data, privateKey: testKey) {
+            check((try? CatalogBundle.verify(data, signature: sig, publicKey: testPub))?.files.count == bundle.files.count, "empaquetar, firmar y verificar")
+            var tampered = data; tampered[tampered.count / 2] ^= 0x01
+            check((try? CatalogBundle.verify(tampered, signature: sig, publicKey: testPub)) == nil, "rechaza un catálogo modificado tras firmarlo")
+            check((try? CatalogBundle.verify(data, signature: sig)) == nil, "rechaza un catálogo firmado con otra clave")
+            var evil = bundle; evil.files["../../evil.json"] = "{}"
+            if let evilData = try? evil.encoded(), let evilSig = try? CatalogBundle.sign(evilData, privateKey: testKey) {
+                check((try? CatalogBundle.verify(evilData, signature: evilSig, publicKey: testPub)) == nil, "rechaza rutas fuera del catálogo aunque estén firmadas")
+            }
+            let target = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-cat-\(UUID().uuidString)/Catalog")
+            defer { try? FileManager.default.removeItem(at: target.deletingLastPathComponent()) }
+            check((try? CatalogUpdater.install(bundle, into: target)) != nil && Catalog.version(of: target) == bundle.version,
+                  "instala el catálogo verificado en su carpeta")
+        } else {
+            check(false, "no se pudo empaquetar el catálogo")
+        }
+        let dist = dir.deletingLastPathComponent().appendingPathComponent("dist")
+        if let data = try? Data(contentsOf: dist.appendingPathComponent("catalog.json")),
+           let sig = try? String(contentsOf: dist.appendingPathComponent("catalog.json.sig"), encoding: .utf8) {
+            check((try? CatalogBundle.verify(data, signature: sig)) != nil, "dist/catalog.json tiene una firma válida con la clave de la app")
+        }
 
         print("== DiskTree")
         check(DiskTreeLink.Destination.tab("cleanup").url?.absoluteString == "disktree://open?tab=cleanup", "enlace a pestaña")

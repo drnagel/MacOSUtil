@@ -3,6 +3,7 @@ import TweakEngine
 import AppCatalog
 import Profiles
 import UniformTypeIdentifiers
+import CatalogUpdate
 
 enum SidebarItem: Hashable {
     case category(String)
@@ -46,6 +47,25 @@ final class AppModel {
     init() {
         load()
     }
+
+    /// Descarga el catálogo firmado de GitHub y, si es más nuevo y válido, lo usa en lugar del incluido.
+    func checkCatalogUpdate() {
+        Task {
+            do {
+                switch try await CatalogUpdater.check() {
+                case .updated(let v):
+                    load(); apps.load(); apps.refresh(); loadProfilesAgain()
+                    banner = Banner(text: L("Catálogo actualizado a la versión \(v)."), isError: false)
+                case .upToDate(let v):
+                    banner = Banner(text: L("El catálogo ya está al día (versión \(v))."), isError: false)
+                }
+            } catch {
+                banner = Banner(text: error.localizedDescription, isError: true)
+            }
+        }
+    }
+
+    private func loadProfilesAgain() { if let dir = Catalog.locate() { loadProfiles(from: dir) } }
 
     func load() {
         do {
@@ -178,14 +198,14 @@ final class AppModel {
         Task {
             let setup = await currentSetup()
             let panel = NSSavePanel()
-            panel.title = "Exportar configuración"
-            panel.message = "Se guardan los ajustes activados y las apps instaladas del catálogo. No incluye datos personales."
-            panel.nameFieldStringValue = "Mi Mac.\(SetupFile.fileExtension)"
+            panel.title = L("Exportar configuración")
+            panel.message = L("Se guardan los ajustes activados y las apps instaladas del catálogo. No incluye datos personales.")
+            panel.nameFieldStringValue = L("Mi Mac") + ".\(SetupFile.fileExtension)"
             panel.allowedContentTypes = [.json]
             guard panel.runModal() == .OK, let url = panel.url else { return }
             do {
                 try setup.encoded().write(to: url, options: .atomic)
-                banner = Banner(text: "Configuración exportada: \(setup.tweaks.count) ajustes y \(setup.apps.count) apps.\n\(url.lastPathComponent)",
+                banner = Banner(text: L("Configuración exportada: \(setup.tweaks.count) ajustes y \(setup.apps.count) apps.") + "\n" + url.lastPathComponent,
                                 isError: false)
             } catch {
                 banner = Banner(text: error.localizedDescription, isError: true)
@@ -195,7 +215,7 @@ final class AppModel {
 
     func importSetup() {
         let panel = NSOpenPanel()
-        panel.title = "Importar configuración"
+        panel.title = L("Importar configuración")
         panel.allowedContentTypes = [.json]
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
@@ -206,7 +226,7 @@ final class AppModel {
             setup.apps.removeAll { unknown.apps.contains($0) }
             openWizard(seed: setup)
             if !unknown.tweaks.isEmpty || !unknown.apps.isEmpty {
-                wizard?.notice = "Se ignoran \(unknown.tweaks.count + unknown.apps.count) elementos que esta versión de MacOSUtil no conoce: "
+                wizard?.notice = L("Se ignoran \(unknown.tweaks.count + unknown.apps.count) elementos que esta versión de MacOSUtil no conoce:") + " "
                     + (unknown.tweaks + unknown.apps).joined(separator: ", ")
             }
         } catch {
@@ -219,7 +239,7 @@ final class AppModel {
     /// Vuelve a activar los ajustes de la última configuración aplicada (p. ej. tras actualizar macOS).
     func reapplyLast() {
         guard let last = LastSetup.load() else {
-            banner = Banner(text: "Todavía no has aplicado ninguna configuración con el asistente.", isError: false)
+            banner = Banner(text: L("Todavía no has aplicado ninguna configuración con el asistente."), isError: false)
             return
         }
         Task {
@@ -227,11 +247,10 @@ final class AppModel {
             await apps.refreshNow()
             let missing = (apps.catalog?.allApps ?? []).filter { last.apps.contains($0.id) && !apps.status($0).isInstalled }
             var b = result.changed.isEmpty && result.failed.isEmpty
-                ? Banner(text: "Todo sigue como en la última configuración: no había nada que reaplicar.", isError: false)
+                ? Banner(text: L("Todo sigue como en la última configuración: no había nada que reaplicar."), isError: false)
                 : Self.describe(result)
             if !missing.isEmpty {
-                b = Banner(text: b.text + "\n\nFaltan \(missing.count) apps de esa configuración: \(missing.map(\.name).joined(separator: ", ")). "
-                           + "Puedes instalarlas desde Apps.", isError: b.isError)
+                b = Banner(text: b.text + "\n\n" + L("Faltan \(missing.count) apps de esa configuración: \(missing.map(\.name).joined(separator: ", ")). Puedes instalarlas desde Apps."), isError: b.isError)
             }
             banner = b
         }
@@ -240,11 +259,11 @@ final class AppModel {
     static func describe(_ r: BatchResult) -> Banner {
         if !r.failed.isEmpty {
             let lines = r.failed.map { "• \($0.error)" }.joined(separator: "\n")
-            return Banner(text: "\(r.changed.count) cambios aplicados, \(r.failed.count) con error:\n\(lines)", isError: true)
+            return Banner(text: L("\(r.changed.count) cambios aplicados, \(r.failed.count) con error:") + "\n" + lines, isError: true)
         }
-        var text = r.changed.count == 1 ? "1 cambio aplicado." : "\(r.changed.count) cambios aplicados."
-        if !r.restarted.isEmpty { text += " Reiniciado: \(r.restarted.joined(separator: ", "))." }
-        if r.needsLogout { text += " Algunos cambios se notarán del todo al cerrar sesión o reabrir las apps." }
+        var text = r.changed.count == 1 ? L("1 cambio aplicado.") : L("\(r.changed.count) cambios aplicados.")
+        if !r.restarted.isEmpty { text += " " + L("Reiniciado: \(r.restarted.joined(separator: ", ")).") }
+        if r.needsLogout { text += " " + L("Algunos cambios se notarán del todo al cerrar sesión o reabrir las apps.") }
         return Banner(text: text, isError: false)
     }
 }

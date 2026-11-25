@@ -63,7 +63,7 @@ struct AppsView: View {
         .safeAreaInset(edge: .bottom) { AppsBar() }
         .sheet(isPresented: $model.showLog) { LogSheet() }
         .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
+            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
         .onAppear { if model.statuses.isEmpty { model.refresh() } }
         .confirmationDialog("¿Pasar \(model.adoptable.count) apps a Homebrew?", isPresented: $confirmAdoptAll) {
@@ -81,18 +81,18 @@ enum AdoptText {
         var t: String
         switch plan.mode {
         case .adopt:
-            t = "\(a.name): tu copia (\(plan.localVersion ?? "?")) es la misma que la de Homebrew; se adopta sin descargar nada."
+            t = L("\(a.name): tu copia (\(plan.localVersion ?? "?")) es la misma que la de Homebrew; se adopta sin descargar nada.")
         case .replace:
-            t = "\(a.name): se descarga la \(plan.caskVersion) y sustituye a tu copia (\(plan.localVersion ?? "versión desconocida"))."
+            t = L("\(a.name): se descarga la \(plan.caskVersion) y sustituye a tu copia (\(plan.localVersion ?? L("versión desconocida"))).")
         }
-        if plan.needsTerminal { t += " Se hace en Terminal porque pide tu contraseña." }
-        if open { t += " Está abierta: ciérrala antes." }
+        if plan.needsTerminal { t += " " + L("Se hace en Terminal porque pide tu contraseña.") }
+        if open { t += " " + L("Está abierta: ciérrala antes.") }
         return t
     }
 
     static func summary(_ apps: [AppEntry], model: AppsModel) -> String {
         let lines = apps.compactMap { a in model.adoptPlan(a).map { "• " + line(a, $0, open: model.isOpen(a)) } }
-        return lines.joined(separator: "\n") + "\n\nTus ajustes y datos de ~/Library se conservan."
+        return lines.joined(separator: "\n") + "\n\n" + L("Tus ajustes y datos de ~/Library se conservan.")
     }
 }
 
@@ -119,7 +119,8 @@ struct AppRow: View {
                 HStack(spacing: 6) {
                     Text(app.name)
                     StatusTag(status: status)
-                    if model.needsAdmin(app) { Tag(text: "Pide contraseña", color: .secondary) }
+                    if model.needsAdmin(app) { Tag(text: L("Pide contraseña"), color: .secondary) }
+                    if let v = model.requiredMacOS(app) { Tag(text: L("Requiere macOS \(v) o posterior"), color: .red) }
                     if app.appStore != nil { Tag(text: "App Store", color: .blue) }
                 }
                 Text(app.description).font(.uiCallout).foregroundStyle(.secondary)
@@ -131,10 +132,10 @@ struct AppRow: View {
         .contentShape(Rectangle())
         .onTapGesture { model.toggle(app) }
         .confirmationDialog("¿Pasar \(app.name) a Homebrew?", isPresented: $confirmAdopt) {
-            Button(model.adoptPlan(app)?.mode == .adopt ? "Adoptar" : "Sustituir por la de Homebrew") { model.adopt([app]) }
+            Button(model.adoptPlan(app)?.mode == .adopt ? L("Adoptar") : L("Sustituir por la de Homebrew")) { model.adopt([app]) }
         } message: {
             if let plan = model.adoptPlan(app) {
-                Text(AdoptText.line(app, plan, open: model.isOpen(app)) + " Tus ajustes y datos de ~/Library se conservan.")
+                Text(AdoptText.line(app, plan, open: model.isOpen(app)) + " " + L("Tus ajustes y datos de ~/Library se conservan."))
             }
         }
         .confirmationDialog("¿Desinstalar \(app.name)?", isPresented: $confirmUninstall) {
@@ -175,11 +176,11 @@ struct StatusTag: View {
     var body: some View {
         switch status {
         case .brew(let v, let outdated):
-            Tag(text: outdated ? "Actualización disponible" : "Instalada · \(v)", color: outdated ? .orange : .green)
+            Tag(text: outdated ? L("Actualización disponible") : L("Instalada · \(v)"), color: outdated ? .orange : .green)
         case .manual:
-            Tag(text: "Instalada fuera de Homebrew", color: .teal)
+            Tag(text: L("Instalada fuera de Homebrew"), color: .teal)
         case .unavailable:
-            Tag(text: "No disponible en Homebrew", color: .red)
+            Tag(text: L("No disponible en Homebrew"), color: .red)
         case .notInstalled, .unknown:
             EmptyView()
         }
@@ -197,12 +198,12 @@ struct AppsBar: View {
                 if model.isRunning {
                     ProgressView().controlSize(.small)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(model.currentTask ?? "Trabajando…")
+                        Text(model.currentTask ?? L("Trabajando…"))
                         Text(model.log.last ?? "").font(.uiCaption).foregroundStyle(.secondary).lineLimit(1)
                     }
                 } else {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.accentColor)
-                    Text(model.selected.count == 1 ? "1 app seleccionada" : "\(model.selected.count) apps seleccionadas")
+                    Text(model.selected.count == 1 ? L("1 app seleccionada") : L("\(model.selected.count) apps seleccionadas"))
                 }
                 Spacer()
                 Button("Registro") { model.showLog = true }.disabled(model.log.isEmpty)

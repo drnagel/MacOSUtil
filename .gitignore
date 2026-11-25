@@ -2,3 +2,6 @@
 build/
 .DS_Store
 .swiftpm/
+
+# Claves de firma: nunca en el repo
+*.key

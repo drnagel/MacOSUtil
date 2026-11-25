@@ -33,15 +33,35 @@ public struct Catalog: Sendable {
         return catalog
     }
 
-    /// Busca el catálogo: variable MACOSUTIL_CATALOG, dentro de la app (Contents/Resources/Catalog)
-    /// o subiendo desde el ejecutable hasta la raíz del repo (para `swift run` y el selftest).
+    /// Catálogo descargado y verificado (`CatalogUpdater`).
+    public static var downloadedDir: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("MacOSUtil/Catalog")
+    }
+
+    /// Versión de una carpeta de catálogo (`catalog.json`), 0 si no la tiene.
+    public static func version(of dir: URL) -> Int {
+        guard let data = try? Data(contentsOf: dir.appendingPathComponent("catalog.json")),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return 0 }
+        return json["version"] as? Int ?? 0
+    }
+
+    /// Busca el catálogo: variable MACOSUTIL_CATALOG; el descargado si es más nuevo que el incluido; dentro de la
+    /// app (Contents/Resources/Catalog); o subiendo desde el ejecutable hasta la raíz del repo (`swift run`, selftest).
     public static func locate() -> URL? {
         let fm = FileManager.default
         var candidates: [URL] = []
         if let env = ProcessInfo.processInfo.environment["MACOSUTIL_CATALOG"] {
             candidates.append(URL(fileURLWithPath: env))
         }
-        if let res = Bundle.main.resourceURL { candidates.append(res.appendingPathComponent("Catalog")) }
+        if let res = Bundle.main.resourceURL {
+            let bundled = res.appendingPathComponent("Catalog")
+            if fm.fileExists(atPath: downloadedDir.appendingPathComponent("tweaks").path),
+               version(of: downloadedDir) > version(of: bundled) {
+                candidates.append(downloadedDir)
+            }
+            candidates.append(bundled)
+        }
         var dir = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().deletingLastPathComponent()
         for _ in 0..<8 {
             candidates.append(dir.appendingPathComponent("Catalog"))
@@ -57,19 +77,20 @@ public struct Catalog: Sendable {
         var ids: Set<String> = []
         var slots: [String: String] = [:]
         for c in categories {
-            if c.tweaks.isEmpty && c.links.isEmpty { problems.append("\(c.id): categoría vacía") }
+            if c.tweaks.isEmpty && c.links.isEmpty { problems.append(L("\(c.id): categoría vacía")) }
             for l in c.links {
-                if !ids.insert(l.id).inserted { problems.append("\(l.id): id repetido") }
-                if !l.id.hasPrefix(c.id + ".") { problems.append("\(l.id): el id debe empezar por «\(c.id).»") }
-                if l.settingsURL == nil { problems.append("\(l.id): solo se permiten URLs \(SettingsPaneLink.scheme):") }
+                if !ids.insert(l.id).inserted { problems.append(L("\(l.id): id repetido")) }
+                if !l.id.hasPrefix(c.id + ".") { problems.append(L("\(l.id): el id debe empezar por «\(c.id).»")) }
+                if l.settingsURL == nil { problems.append(L("\(l.id): solo se permiten URLs \(SettingsPaneLink.scheme):")) }
             }
             for t in c.tweaks {
-                if !ids.insert(t.id).inserted { problems.append("\(t.id): id repetido") }
-                if !t.id.hasPrefix(c.id + ".") { problems.append("\(t.id): el id debe empezar por «\(c.id).»") }
-                if t.actions.isEmpty { problems.append("\(t.id): sin acciones") }
+                if !ids.insert(t.id).inserted { problems.append(L("\(t.id): id repetido")) }
+                if !t.id.hasPrefix(c.id + ".") { problems.append(L("\(t.id): el id debe empezar por «\(c.id).»")) }
+                if t.actions.isEmpty { problems.append(L("\(t.id): sin acciones")) }
+                if let v = t.tested, (Int(v) ?? 0) < 15 { problems.append(L("\(t.id): «tested» debe ser una versión mayor de macOS (15 o más)")) }
                 for case .defaults(let a) in t.actions {
                     if let other = slots[a.slot], other != t.id {
-                        problems.append("\(t.id): \(a.slot) ya lo usa \(other)")
+                        problems.append(L("\(t.id): \(a.slot) ya lo usa \(other)"))
                     }
                     slots[a.slot] = t.id
                 }
@@ -83,7 +104,7 @@ public struct Catalog: Sendable {
         switch e {
         case .dataCorrupted(let c), .keyNotFound(_, let c), .typeMismatch(_, let c), .valueNotFound(_, let c):
             let path = c.codingPath.map { $0.intValue.map { "[\($0)]" } ?? ".\($0.stringValue)" }.joined()
-            if case .keyNotFound(let k, _) = e { return "\(path): falta «\(k.stringValue)»" }
+            if case .keyNotFound(let k, _) = e { return L("\(path): falta «\(k.stringValue)»") }
             return "\(path): \(c.debugDescription)"
         @unknown default: return e.localizedDescription
         }
@@ -97,9 +118,9 @@ public enum CatalogError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .notFound: "No se encontró la carpeta Catalog."
+        case .notFound: L("No se encontró la carpeta Catalog.")
         case .invalidFile(let f, let why): "\(f): \(why)"
-        case .invalidContent(let p): "Catálogo inválido:\n" + p.joined(separator: "\n")
+        case .invalidContent(let p): L("Catálogo inválido:") + "\n" + p.joined(separator: "\n")
         }
     }
 }

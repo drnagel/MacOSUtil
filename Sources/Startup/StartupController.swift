@@ -43,12 +43,12 @@ public final class StartupController: @unchecked Sendable {
 
     public func disable(_ item: StartupItem) throws {
         guard item.canToggle, let plist = item.plistPath else {
-            throw StartupError.notAllowed("«\(item.displayName)» no se puede desactivar desde aquí: \(item.scope.subtitle)")
+            throw StartupError.notAllowed(L("«\(item.displayName)» no se puede desactivar desde aquí: \(item.scope.subtitle)"))
         }
         if item.scope.needsAdmin {
             try Self.checkDaemon(plist)
             let outcomes = try AdminRunner.run([.daemonDisable(label: item.label), .daemonStop(label: item.label)],
-                                               reason: "MacOSUtil quiere desactivar el servicio «\(item.displayName)».")
+                                               reason: L("MacOSUtil quiere desactivar el servicio «\(item.displayName)»."))
             try Self.check(outcomes)
         } else {
             let target = "\(item.scope.domain)/\(item.label)"
@@ -62,12 +62,12 @@ public final class StartupController: @unchecked Sendable {
 
     public func enable(_ item: StartupItem) throws {
         guard item.canToggle, let plist = item.plistPath else {
-            throw StartupError.notAllowed("«\(item.displayName)» no se puede activar desde aquí.")
+            throw StartupError.notAllowed(L("«\(item.displayName)» no se puede activar desde aquí."))
         }
         if item.scope.needsAdmin {
             try Self.checkDaemon(plist)
             let outcomes = try AdminRunner.run(Self.enableCommands(label: item.label, plistPath: plist),
-                                               reason: "MacOSUtil quiere reactivar el servicio «\(item.displayName)».")
+                                               reason: L("MacOSUtil quiere reactivar el servicio «\(item.displayName)»."))
             try Self.check(outcomes)
             try save { $0.disabled[item.label] = nil }
         } else {
@@ -78,7 +78,7 @@ public final class StartupController: @unchecked Sendable {
     /// Antes de pedir la contraseña: solo daemons con su plist en /Library/LaunchDaemons.
     static func checkDaemon(_ plistPath: String) throws {
         guard AdminCommand.isDaemonPlistPath(plistPath) else {
-            throw AdminError.rejected("el plist no está en /Library/LaunchDaemons: \(plistPath)")
+            throw AdminError.rejected(L("el plist no está en /Library/LaunchDaemons: \(plistPath)"))
         }
     }
 
@@ -90,7 +90,7 @@ public final class StartupController: @unchecked Sendable {
 
     static func check(_ outcomes: [AdminRunner.Outcome]) throws {
         if let bad = outcomes.first(where: { !$0.ok }) {
-            throw StartupError.launchctl(bad.output.isEmpty ? "launchctl terminó con código \(bad.status)" : bad.output)
+            throw StartupError.launchctl(bad.output.isEmpty ? L("launchctl terminó con código \(bad.status)") : bad.output)
         }
     }
 
@@ -112,7 +112,7 @@ public final class StartupController: @unchecked Sendable {
         for d in daemons { batch.append((d.label, Self.enableCommands(label: d.label, plistPath: d.plistPath))) }
         do {
             let outcomes = try AdminRunner.run(batch.flatMap(\.commands),
-                                               reason: "MacOSUtil quiere reactivar \(daemons.count) \(daemons.count == 1 ? "servicio" : "servicios") del sistema.")
+                                               reason: daemons.count == 1 ? L("MacOSUtil quiere reactivar 1 servicio del sistema.") : L("MacOSUtil quiere reactivar \(daemons.count) servicios del sistema."))
             var i = 0
             for b in batch {
                 let mine = Array(outcomes[i..<(i + b.commands.count)])

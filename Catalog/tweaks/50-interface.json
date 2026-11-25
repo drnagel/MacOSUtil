@@ -1,45 +1,98 @@
 {
   "id": "interface",
-  "title": "Interfaz",
+  "title": { "en": "Interface", "es": "Interfaz" },
   "icon": "macwindow",
   "order": 50,
   "tweaks": [
     {
       "id": "interface.expanded-save-panel",
-      "title": "Diálogo de guardar expandido",
-      "description": "El diálogo de guardar se abre con el explorador de carpetas a la vista, sin tener que desplegarlo.",
+      "title": { "en": "Expanded save dialog", "es": "Diálogo de guardar expandido" },
+      "description": { "en": "The save dialog opens with the folder browser visible, no need to expand it.", "es": "El diálogo de guardar se abre con el explorador de carpetas a la vista, sin tener que desplegarlo." },
+      "tested": "27",
       "actions": [
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSNavPanelExpandedStateForSaveMode", "valueType": "bool", "value": true },
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSNavPanelExpandedStateForSaveMode2", "valueType": "bool", "value": true }
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSNavPanelExpandedStateForSaveMode",
+          "valueType": "bool",
+          "value": true
+        },
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSNavPanelExpandedStateForSaveMode2",
+          "valueType": "bool",
+          "value": true
+        }
       ]
     },
     {
       "id": "interface.expanded-print-panel",
-      "title": "Diálogo de imprimir expandido",
-      "description": "El diálogo de imprimir se abre con todas las opciones a la vista.",
+      "title": { "en": "Expanded print dialog", "es": "Diálogo de imprimir expandido" },
+      "description": { "en": "The print dialog opens with all options visible.", "es": "El diálogo de imprimir se abre con todas las opciones a la vista." },
+      "tested": "27",
       "actions": [
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "PMPrintingExpandedStateForPrint", "valueType": "bool", "value": true },
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "PMPrintingExpandedStateForPrint2", "valueType": "bool", "value": true }
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "PMPrintingExpandedStateForPrint",
+          "valueType": "bool",
+          "value": true
+        },
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "PMPrintingExpandedStateForPrint2",
+          "valueType": "bool",
+          "value": true
+        }
       ]
     },
     {
       "id": "interface.save-to-disk",
-      "title": "Guardar en el Mac, no en iCloud",
-      "description": "Los documentos nuevos se guardan por defecto en el disco local en lugar de en iCloud Drive.",
-      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSDocumentSaveNewDocumentsToCloud", "valueType": "bool", "value": false }]
+      "title": { "en": "Save to your Mac, not iCloud", "es": "Guardar en el Mac, no en iCloud" },
+      "description": { "en": "New documents are saved to the local disk by default instead of iCloud Drive.", "es": "Los documentos nuevos se guardan por defecto en el disco local en lugar de en iCloud Drive." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSDocumentSaveNewDocumentsToCloud",
+          "valueType": "bool",
+          "value": false
+        }
+      ]
     },
     {
       "id": "interface.always-scrollbars",
-      "title": "Barras de desplazamiento siempre visibles",
-      "description": "Las barras de desplazamiento no se ocultan al dejar de moverte.",
-      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "AppleShowScrollBars", "valueType": "string", "value": "Always" }],
+      "title": { "en": "Always show scroll bars", "es": "Barras de desplazamiento siempre visibles" },
+      "description": { "en": "Scroll bars don't hide when you stop scrolling.", "es": "Las barras de desplazamiento no se ocultan al dejar de moverte." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "AppleShowScrollBars",
+          "valueType": "string",
+          "value": "Always"
+        }
+      ],
       "logout": true
     },
     {
       "id": "interface.no-window-animations",
-      "title": "Sin animación al abrir ventanas",
-      "description": "Las ventanas y diálogos nuevos aparecen al instante, sin el efecto de zoom.",
-      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticWindowAnimationsEnabled", "valueType": "bool", "value": false }],
+      "title": { "en": "No window opening animation", "es": "Sin animación al abrir ventanas" },
+      "description": { "en": "New windows and dialogs appear instantly, without the zoom effect.", "es": "Las ventanas y diálogos nuevos aparecen al instante, sin el efecto de zoom." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSAutomaticWindowAnimationsEnabled",
+          "valueType": "bool",
+          "value": false
+        }
+      ],
       "logout": true
     }
   ]

@@ -11,6 +11,10 @@ struct MacOSUtilApp: App {
         if CommandLine.arguments.contains("--selftest") {
             exit(SelfTest.run() ? 0 : 1)
         }
+        // Herramienta del catálogo: `MacOSUtil --catalog validate|keygen|bundle|verify`
+        if let i = CommandLine.arguments.firstIndex(of: "--catalog") {
+            exit(CatalogTool.run(Array(CommandLine.arguments[(i + 1)...])))
+        }
         _app = State(initialValue: AppModel.shared)
     }
 
@@ -34,6 +38,7 @@ struct MacOSUtilApp: App {
             CommandMenu("Ajustes") {
                 Button("Volver a comprobar") { app.refresh(); app.apps.refresh(); app.startup.refresh(); app.power.refresh(); app.health.refresh() }.keyboardShortcut("r", modifiers: .command)
                 Button("Recargar catálogo") { app.load(); app.apps.load(); app.apps.refresh() }.keyboardShortcut("r", modifiers: [.command, .shift])
+                Button("Buscar actualizaciones del catálogo…") { app.checkCatalogUpdate() }
                 Divider()
                 Button("Abrir DiskTree") { DiskTreeLink.open() }.disabled(DiskTreeLink.appURL == nil)
             }

@@ -1,4 +1,5 @@
 import Foundation
+import CatalogText
 
 /// `Catalog/apps.json`: categorías de apps recomendadas.
 public struct AppCatalogFile: Codable, Sendable {
@@ -11,6 +12,16 @@ public struct AppCategory: Codable, Identifiable, Hashable, Sendable {
     /// Nombre de SF Symbol.
     public let icon: String
     public let apps: [AppEntry]
+
+    enum CodingKeys: String, CodingKey { case id, title, icon, apps }
+
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeLocalized(forKey: .title)
+        icon = try c.decode(String.self, forKey: .icon)
+        apps = try c.decode([AppEntry].self, forKey: .apps)
+    }
 }
 
 /// Una app del catálogo. Se instala con Homebrew (`cask`) o se abre su página en la App Store (`appStore`).
@@ -25,6 +36,18 @@ public struct AppEntry: Codable, Identifiable, Hashable, Sendable {
     /// para casks se obtiene de Homebrew.
     public let appName: String?
     public let homepage: String?
+
+    enum CodingKeys: String, CodingKey { case name, description, cask, appStore, appName, homepage }
+
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        name = try c.decode(String.self, forKey: .name)
+        description = try c.decodeLocalized(forKey: .description)
+        cask = try c.decodeIfPresent(String.self, forKey: .cask)
+        appStore = try c.decodeIfPresent(String.self, forKey: .appStore)
+        appName = try c.decodeIfPresent(String.self, forKey: .appName)
+        homepage = try c.decodeIfPresent(String.self, forKey: .homepage)
+    }
 
     public var id: String { cask ?? "mas-\(appStore ?? name)" }
 
@@ -75,10 +98,18 @@ public struct CaskInfo: Sendable, Equatable {
     public let appPaths: [String]
     /// Instala un .pkg o un instalador: necesita contraseña de administrador.
     public let needsAdmin: Bool
+    /// Versión mayor mínima de macOS que pide el cask (`depends_on.macos >= …`), si la declara.
+    public let minMacOS: Int?
 
-    public init(token: String, version: String, installed: String?, outdated: Bool, appPaths: [String], needsAdmin: Bool) {
+    public init(token: String, version: String, installed: String?, outdated: Bool, appPaths: [String], needsAdmin: Bool,
+                minMacOS: Int? = nil) {
         self.token = token; self.version = version; self.installed = installed
-        self.outdated = outdated; self.appPaths = appPaths; self.needsAdmin = needsAdmin
+        self.outdated = outdated; self.appPaths = appPaths; self.needsAdmin = needsAdmin; self.minMacOS = minMacOS
+    }
+
+    /// Este Mac tiene una versión de macOS más antigua que la que pide el cask.
+    public func isTooNew(forMajor major: Int = ProcessInfo.processInfo.operatingSystemVersion.majorVersion) -> Bool {
+        minMacOS.map { major < $0 } ?? false
     }
 }
 
@@ -88,7 +119,7 @@ public enum AppCatalogError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .notFound: "No se encontró Catalog/apps.json."
+        case .notFound: L("No se encontró Catalog/apps.json.")
         case .invalid(let why): "apps.json: \(why)"
         }
     }
@@ -114,14 +145,14 @@ public extension AppCatalogFile {
         var problems: [String] = []
         var ids: Set<String> = []
         for c in categories {
-            if c.apps.isEmpty { problems.append("\(c.id): categoría vacía") }
+            if c.apps.isEmpty { problems.append(L("\(c.id): categoría vacía")) }
             for a in c.apps {
-                if a.source == nil { problems.append("\(a.name): falta «cask» o «appStore»") }
-                if a.cask != nil && a.appStore != nil { problems.append("\(a.name): usa solo «cask» o «appStore»") }
-                if let t = a.cask, !Homebrew.isValidToken(t) { problems.append("\(a.name): token de cask no válido «\(t)»") }
-                if let s = a.appStore, Int(s) == nil { problems.append("\(a.name): id de App Store no numérico") }
-                if a.appStore != nil && a.appName == nil { problems.append("\(a.name): las apps de App Store necesitan «appName»") }
-                if !ids.insert(a.id).inserted { problems.append("\(a.id): repetida") }
+                if a.source == nil { problems.append(L("\(a.name): falta «cask» o «appStore»")) }
+                if a.cask != nil && a.appStore != nil { problems.append(L("\(a.name): usa solo «cask» o «appStore»")) }
+                if let t = a.cask, !Homebrew.isValidToken(t) { problems.append(L("\(a.name): token de cask no válido «\(t)»")) }
+                if let s = a.appStore, Int(s) == nil { problems.append(L("\(a.name): id de App Store no numérico")) }
+                if a.appStore != nil && a.appName == nil { problems.append(L("\(a.name): las apps de App Store necesitan «appName»")) }
+                if !ids.insert(a.id).inserted { problems.append(L("\(a.id): repetida")) }
             }
         }
         return problems

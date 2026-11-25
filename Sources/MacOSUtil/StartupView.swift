@@ -67,7 +67,7 @@ final class StartupModel {
                 if !errors.isEmpty {
                     self.banner = .init(text: errors.map { "• \($0.label): \($0.error)" }.joined(separator: "\n"), isError: true)
                 } else {
-                    self.banner = .init(text: "Se reactivó todo lo que había desactivado MacOSUtil.", isError: false)
+                    self.banner = .init(text: L("Se reactivó todo lo que había desactivado MacOSUtil."), isError: false)
                 }
                 self.refresh()
             }
@@ -88,16 +88,16 @@ struct StartupView: View {
         Form {
             Section {
                 HStack(spacing: 24) {
-                    Stat(value: "\(model.items.count)", label: "servicios de terceros")
-                    Stat(value: "\(model.running.count)", label: "en marcha ahora")
+                    Stat(value: "\(model.items.count)", label: L("servicios de terceros"))
+                    Stat(value: "\(model.running.count)", label: L("en marcha ahora"))
                     Stat(value: ByteCountFormatter.string(fromByteCount: model.runningMemory, countStyle: .memory),
-                         label: "de memoria en uso")
+                         label: L("de memoria en uso"))
                     Spacer()
                     if model.isScanning { ProgressView().controlSize(.small) }
                 }
                 if model.managedCount > 0 {
                     HStack {
-                        Text("MacOSUtil desactivó \(model.managedCount) \(model.managedCount == 1 ? "servicio" : "servicios").")
+                        Text(model.managedCount == 1 ? L("MacOSUtil desactivó 1 servicio.") : L("MacOSUtil desactivó \(model.managedCount) servicios."))
                         Spacer()
                         Button("Reactivar todo") { confirmEnableAll = true }
                     }
@@ -133,11 +133,11 @@ struct StartupView: View {
         .confirmationDialog("¿Reactivar todo?", isPresented: $confirmEnableAll) {
             Button("Reactivar \(model.managedCount)") { model.enableAll() }
         } message: {
-            Text("Los servicios que desactivó MacOSUtil vuelven a arrancar ahora y al iniciar sesión."
-                 + (model.controller.records.contains { $0.scope.needsAdmin } ? " Para los del sistema, macOS pedirá tu contraseña una vez." : ""))
+            Text(L("Los servicios que desactivó MacOSUtil vuelven a arrancar ahora y al iniciar sesión.")
+                 + (model.controller.records.contains { $0.scope.needsAdmin } ? " " + L("Para los del sistema, macOS pedirá tu contraseña una vez.") : ""))
         }
         .alert(item: $model.banner) { b in
-            Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
+            Alert(title: Text(b.isError ? L("Hubo problemas") : L("Listo")), message: Text(b.text))
         }
     }
 }
@@ -166,17 +166,17 @@ struct StartupRow: View {
                 HStack(spacing: 6) {
                     Text(item.displayName)
                     if item.disabled {
-                        Tag(text: "Desactivado", color: .orange)
+                        Tag(text: L("Desactivado"), color: .orange)
                     } else if let pid = item.pid {
-                        Tag(text: "En marcha" + (item.memory.map { " · " + ByteCountFormatter.string(fromByteCount: $0, countStyle: .memory) } ?? ""),
+                        Tag(text: L("En marcha") + (item.memory.map { " · " + ByteCountFormatter.string(fromByteCount: $0, countStyle: .memory) } ?? ""),
                             color: .green)
                             .help("PID \(pid)")
                     } else {
-                        Tag(text: item.loaded ? "En espera" : "No cargado", color: .secondary)
+                        Tag(text: item.loaded ? L("En espera") : L("No cargado"), color: .secondary)
                     }
-                    if item.isOrphan { Tag(text: "Resto: el programa ya no existe", color: .red) }
-                    else if item.ownerAppMissing && item.scope != .daemon { Tag(text: "No se encontró su app", color: .yellow) }
-                    if model.isManaged(item) { Tag(text: "Cambiado por MacOSUtil", color: .green) }
+                    if item.isOrphan { Tag(text: L("Resto: el programa ya no existe"), color: .red) }
+                    else if item.ownerAppMissing && item.scope != .daemon { Tag(text: L("No se encontró su app"), color: .yellow) }
+                    if model.isManaged(item) { Tag(text: L("Cambiado por MacOSUtil"), color: .green) }
                 }
                 Text(item.label).font(.uiMono).foregroundStyle(.secondary).textSelection(.enabled)
                 if !item.schedule.isEmpty {
@@ -201,7 +201,7 @@ struct StartupRow: View {
                         set: { on in if on { model.setEnabled(item, true) } else { confirmDisable = true } }))
                         .toggleStyle(.switch)
                         .labelsHidden()
-                        .help((item.disabled ? "Reactivar" : "Desactivar") + (item.scope.needsAdmin ? " (pide tu contraseña)" : ""))
+                        .help((item.disabled ? L("Reactivar") : L("Desactivar")) + (item.scope.needsAdmin ? " " + L("(pide tu contraseña)") : ""))
                 }
             }
         }
@@ -210,10 +210,10 @@ struct StartupRow: View {
             Button("Desactivar", role: .destructive) { model.setEnabled(item, false) }
         } message: {
             Text((item.scope.needsAdmin
-                  ? "Se detiene ahora y no vuelve a arrancar con el Mac. macOS te pedirá tu contraseña de administrador."
-                  : "Se detiene ahora y no vuelve a arrancar al iniciar sesión.")
-                 + " El archivo no se borra: puedes reactivarlo cuando quieras."
-                 + (item.isOrphan || item.ownerAppMissing ? "" : " La app a la que pertenece puede dejar de funcionar del todo."))
+                  ? L("Se detiene ahora y no vuelve a arrancar con el Mac. macOS te pedirá tu contraseña de administrador.")
+                  : L("Se detiene ahora y no vuelve a arrancar al iniciar sesión."))
+                 + " " + L("El archivo no se borra: puedes reactivarlo cuando quieras.")
+                 + (item.isOrphan || item.ownerAppMissing ? "" : " " + L("La app a la que pertenece puede dejar de funcionar del todo.")))
         }
     }
 }

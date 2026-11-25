@@ -7,11 +7,11 @@ public struct HealthCheck: Identifiable, Sendable, Equatable {
 
         public var title: String {
             switch self {
-            case .security: "Seguridad"
-            case .updates: "Actualizaciones"
-            case .backup: "Copias de seguridad"
-            case .disks: "Discos"
-            case .system: "Sistema"
+            case .security: L("Seguridad")
+            case .updates: L("Actualizaciones")
+            case .backup: L("Copias de seguridad")
+            case .disks: L("Discos")
+            case .system: L("Sistema")
             }
         }
     }
@@ -63,15 +63,15 @@ public enum HealthScanner {
     public static func parseSIP(_ out: String?) -> HealthCheck {
         let t = out?.lowercased() ?? ""
         if t.contains("status: enabled") {
-            return .init(id: "sip", group: .security, title: "Protección de la integridad del sistema (SIP)", status: .good,
-                         detail: "Activada: nadie puede modificar los archivos de macOS, ni siquiera con contraseña de administrador.")
+            return .init(id: "sip", group: .security, title: L("Protección de la integridad del sistema (SIP)"), status: .good,
+                         detail: L("Activada: nadie puede modificar los archivos de macOS, ni siquiera con contraseña de administrador."))
         }
         if t.contains("disabled") {
-            return .init(id: "sip", group: .security, title: "Protección de la integridad del sistema (SIP)", status: .bad,
-                         detail: "Desactivada. Solo se vuelve a activar desde el modo de recuperación (csrutil enable).")
+            return .init(id: "sip", group: .security, title: L("Protección de la integridad del sistema (SIP)"), status: .bad,
+                         detail: L("Desactivada. Solo se vuelve a activar desde el modo de recuperación (csrutil enable)."))
         }
-        return .init(id: "sip", group: .security, title: "Protección de la integridad del sistema (SIP)", status: .info,
-                     detail: "No se pudo leer su estado.")
+        return .init(id: "sip", group: .security, title: L("Protección de la integridad del sistema (SIP)"), status: .info,
+                     detail: L("No se pudo leer su estado."))
     }
 
     static func fileVault() -> HealthCheck { parseFileVault(Cmd.run("/usr/bin/fdesetup", ["status"])) }
@@ -80,48 +80,48 @@ public enum HealthScanner {
         let t = out ?? ""
         let url = securityPane + "?FileVault"
         if t.contains("FileVault is On") {
-            return .init(id: "filevault", group: .security, title: "FileVault (cifrado del disco)", status: .good,
-                         detail: "Activado: si pierdes o te roban el Mac, nadie puede leer el disco sin tu contraseña.", settingsURL: url)
+            return .init(id: "filevault", group: .security, title: L("FileVault (cifrado del disco)"), status: .good,
+                         detail: L("Activado: si pierdes o te roban el Mac, nadie puede leer el disco sin tu contraseña."), settingsURL: url)
         }
         if t.contains("Encryption in progress") || t.contains("Decryption in progress") {
-            return .init(id: "filevault", group: .security, title: "FileVault (cifrado del disco)", status: .info,
-                         detail: "Cambiando el cifrado ahora mismo.", settingsURL: url)
+            return .init(id: "filevault", group: .security, title: L("FileVault (cifrado del disco)"), status: .info,
+                         detail: L("Cambiando el cifrado ahora mismo."), settingsURL: url)
         }
         if t.contains("FileVault is Off") {
-            return .init(id: "filevault", group: .security, title: "FileVault (cifrado del disco)", status: .warning,
-                         detail: "Desactivado: si te roban el Mac, pueden leer todos tus archivos conectando el disco a otro equipo. Activarlo no ralentiza un Mac con chip de Apple.",
+            return .init(id: "filevault", group: .security, title: L("FileVault (cifrado del disco)"), status: .warning,
+                         detail: L("Desactivado: si te roban el Mac, pueden leer todos tus archivos conectando el disco a otro equipo. Activarlo no ralentiza un Mac con chip de Apple."),
                          settingsURL: url)
         }
-        return .init(id: "filevault", group: .security, title: "FileVault (cifrado del disco)", status: .info,
-                     detail: "No se pudo leer su estado.", settingsURL: url)
+        return .init(id: "filevault", group: .security, title: L("FileVault (cifrado del disco)"), status: .info,
+                     detail: L("No se pudo leer su estado."), settingsURL: url)
     }
 
     static func gatekeeper() -> HealthCheck {
         let t = Cmd.run("/usr/sbin/spctl", ["--status"]) ?? ""
         if t.contains("assessments enabled") {
-            return .init(id: "gatekeeper", group: .security, title: "Gatekeeper", status: .good,
-                         detail: "Activado: macOS comprueba la firma de las apps antes de abrirlas.")
+            return .init(id: "gatekeeper", group: .security, title: L("Gatekeeper"), status: .good,
+                         detail: L("Activado: macOS comprueba la firma de las apps antes de abrirlas."))
         }
         if t.contains("assessments disabled") {
-            return .init(id: "gatekeeper", group: .security, title: "Gatekeeper", status: .bad,
-                         detail: "Desactivado: cualquier app se abre sin comprobar quién la firmó. Se reactiva con «sudo spctl --master-enable».",
+            return .init(id: "gatekeeper", group: .security, title: L("Gatekeeper"), status: .bad,
+                         detail: L("Desactivado: cualquier app se abre sin comprobar quién la firmó. Se reactiva con «sudo spctl --master-enable»."),
                          settingsURL: securityPane + "?General")
         }
-        return .init(id: "gatekeeper", group: .security, title: "Gatekeeper", status: .info, detail: "No se pudo leer su estado.")
+        return .init(id: "gatekeeper", group: .security, title: L("Gatekeeper"), status: .info, detail: L("No se pudo leer su estado."))
     }
 
     static func firewall() -> HealthCheck {
         let t = Cmd.run("/usr/libexec/ApplicationFirewall/socketfilterfw", ["--getglobalstate"]) ?? ""
         if t.contains("State = 1") || t.contains("State = 2") || t.lowercased().contains("is enabled") {
-            return .init(id: "firewall", group: .security, title: "Firewall", status: .good,
-                         detail: "Activado: bloquea las conexiones entrantes que no hayas permitido.", settingsURL: firewallPane)
+            return .init(id: "firewall", group: .security, title: L("Firewall"), status: .good,
+                         detail: L("Activado: bloquea las conexiones entrantes que no hayas permitido."), settingsURL: firewallPane)
         }
         if t.contains("State = 0") || t.lowercased().contains("is disabled") {
-            return .init(id: "firewall", group: .security, title: "Firewall", status: .warning,
-                         detail: "Desactivado. En casa detrás de un router importa poco; en redes públicas (cafeterías, hoteles) conviene activarlo.",
+            return .init(id: "firewall", group: .security, title: L("Firewall"), status: .warning,
+                         detail: L("Desactivado. En casa detrás de un router importa poco; en redes públicas (cafeterías, hoteles) conviene activarlo."),
                          settingsURL: firewallPane)
         }
-        return .init(id: "firewall", group: .security, title: "Firewall", status: .info, detail: "No se pudo leer su estado.", settingsURL: firewallPane)
+        return .init(id: "firewall", group: .security, title: L("Firewall"), status: .info, detail: L("No se pudo leer su estado."), settingsURL: firewallPane)
     }
 
     // MARK: Actualizaciones
@@ -138,13 +138,13 @@ public enum HealthScanner {
             ($0["Display Name"] as? String)?.replacingOccurrences(of: "\u{00a0}", with: " ")
         }
         let last = prefs["LastSuccessfulDate"] as? Date
-        let checked = last.map { " Última comprobación: \(Fmt.relative($0, now: now))." } ?? ""
+        let checked = last.map { " " + L("Última comprobación: \(Fmt.relative($0, now: now)).") } ?? ""
         if pending.isEmpty {
-            checks.append(.init(id: "updates", group: .updates, title: "Actualizaciones pendientes", status: .good,
-                                detail: "No hay ninguna." + checked, settingsURL: updatePane))
+            checks.append(.init(id: "updates", group: .updates, title: L("Actualizaciones pendientes"), status: .good,
+                                detail: L("No hay ninguna.") + checked, settingsURL: updatePane))
         } else {
             let macOS = pending.contains { $0.hasPrefix("macOS") }
-            checks.append(.init(id: "updates", group: .updates, title: "Actualizaciones pendientes",
+            checks.append(.init(id: "updates", group: .updates, title: L("Actualizaciones pendientes"),
                                 status: macOS ? .warning : .info,
                                 detail: pending.joined(separator: " · ") + "." + checked, settingsURL: updatePane))
         }
@@ -152,15 +152,15 @@ public enum HealthScanner {
         let autoCheck = prefs["AutomaticCheckEnabled"] as? Bool ?? true
         if !autoCheck || !critical {
             var off: [String] = []
-            if !autoCheck { off.append("buscar actualizaciones") }
-            if !critical { off.append("instalar las respuestas de seguridad") }
-            checks.append(.init(id: "autoupdate", group: .updates, title: "Actualizaciones automáticas", status: .warning,
-                                detail: "Desactivado: \(off.joined(separator: " y ")). Los parches de seguridad tardarán en llegar.",
+            if !autoCheck { off.append(L("buscar actualizaciones")) }
+            if !critical { off.append(L("instalar las respuestas de seguridad")) }
+            checks.append(.init(id: "autoupdate", group: .updates, title: L("Actualizaciones automáticas"), status: .warning,
+                                detail: L("Desactivado: \(off.joined(separator: L(" y "))). Los parches de seguridad tardarán en llegar."),
                                 settingsURL: updatePane))
         } else {
             let auto = prefs["AutomaticallyInstallMacOSUpdates"] as? Bool ?? false
-            checks.append(.init(id: "autoupdate", group: .updates, title: "Actualizaciones automáticas", status: .good,
-                                detail: "Las respuestas de seguridad se instalan solas." + (auto ? " macOS también se actualiza solo." : " Las actualizaciones de macOS las instalas tú."),
+            checks.append(.init(id: "autoupdate", group: .updates, title: L("Actualizaciones automáticas"), status: .good,
+                                detail: L("Las respuestas de seguridad se instalan solas.") + " " + (auto ? L("macOS también se actualiza solo.") : L("Las actualizaciones de macOS las instalas tú.")),
                                 settingsURL: updatePane))
         }
         return checks
@@ -189,21 +189,22 @@ public enum HealthScanner {
         let dests = prefs["Destinations"] as? [[String: Any]] ?? []
         guard !dests.isEmpty else {
             return .init(id: "timemachine", group: .backup, title: title, status: .warning,
-                         detail: "No hay ningún disco de copias configurado: si el disco falla, se pierde todo.", settingsURL: timeMachinePane)
+                         detail: L("No hay ningún disco de copias configurado: si el disco falla, se pierde todo."), settingsURL: timeMachinePane)
         }
         let dates = dests.flatMap { $0["SnapshotDates"] as? [Date] ?? [] }
         let names = dests.compactMap { $0["LastKnownVolumeName"] as? String }
         let auto = (prefs["AutoBackup"] as? Bool) ?? ((prefs["AutoBackup"] as? Int).map { $0 != 0 } ?? false)
-        let where_ = names.isEmpty ? "" : " en «\(names.joined(separator: "», «"))»"
+        let place = names.map { "«\($0)»" }.joined(separator: ", ")
         guard let lastDate = dates.max() else {
             return .init(id: "timemachine", group: .backup, title: title, status: .warning,
-                         detail: "Configurado\(where_), pero todavía no hay ninguna copia completa.", settingsURL: timeMachinePane)
+                         detail: place.isEmpty ? L("Configurado, pero todavía no hay ninguna copia completa.") : L("Configurado en \(place), pero todavía no hay ninguna copia completa."), settingsURL: timeMachinePane)
         }
         let days = now.timeIntervalSince(lastDate) / 86_400
-        var detail = "Última copia\(where_): \(Fmt.relative(lastDate, now: now))."
+        var detail = place.isEmpty ? L("Última copia: \(Fmt.relative(lastDate, now: now)).")
+            : L("Última copia en \(place): \(Fmt.relative(lastDate, now: now)).")
         var status: HealthCheck.Status = days > 30 ? .bad : (days > 7 ? .warning : .good)
         if !auto {
-            detail += " Las copias automáticas están desactivadas: solo se hacen cuando las pides."
+            detail += " " + L("Las copias automáticas están desactivadas: solo se hacen cuando las pides.")
             status = max(status, .warning)
         }
         return .init(id: "timemachine", group: .backup, title: title, status: status, detail: detail, settingsURL: timeMachinePane)
@@ -213,7 +214,7 @@ public enum HealthScanner {
 
     static func disks() -> [HealthCheck] {
         guard let list = Cmd.run("/usr/sbin/diskutil", ["list", "physical"], timeout: 8) else {
-            return [.init(id: "smart", group: .disks, title: "Estado de los discos", status: .info, detail: "diskutil no respondió.")]
+            return [.init(id: "smart", group: .disks, title: L("Estado de los discos"), status: .info, detail: L("diskutil no respondió."))]
         }
         let ids = list.components(separatedBy: .newlines).compactMap { line -> String? in
             guard line.hasPrefix("/dev/disk") else { return nil }
@@ -224,7 +225,7 @@ public enum HealthScanner {
 
     public static func parseDiskInfo(id: String, _ out: String?) -> HealthCheck {
         guard let out else {
-            return .init(id: "smart-\(id)", group: .disks, title: id, status: .warning, detail: "El disco no responde.")
+            return .init(id: "smart-\(id)", group: .disks, title: id, status: .warning, detail: L("El disco no responde."))
         }
         var fields: [String: String] = [:]
         for line in out.components(separatedBy: .newlines) {
@@ -235,21 +236,21 @@ public enum HealthScanner {
         let name = fields["Device / Media Name"] ?? id
         let isInternal = (fields["Device Location"] ?? "").lowercased() == "internal" || fields["Internal"] == "Yes"
         let size = fields["Disk Size"].flatMap { $0.split(separator: "(").first.map { $0.trimmingCharacters(in: .whitespaces) } } ?? ""
-        let kind = [isInternal ? "Interno" : "Externo", fields["Protocol"], size.isEmpty ? nil : size].compactMap { $0 }.joined(separator: " · ")
+        let kind = [isInternal ? L("Interno") : L("Externo"), fields["Protocol"], size.isEmpty ? nil : size].compactMap { $0 }.joined(separator: " · ")
         let smart = fields["SMART Status"] ?? ""
         let title = "\(name)"
         switch smart {
         case "Verified":
-            return .init(id: "smart-\(id)", group: .disks, title: title, status: .good, detail: "\(kind). SMART: sin errores.")
+            return .init(id: "smart-\(id)", group: .disks, title: title, status: .good, detail: L("\(kind). SMART: sin errores."))
         case "Failing":
             return .init(id: "smart-\(id)", group: .disks, title: title, status: .bad,
-                         detail: "\(kind). SMART indica que el disco está fallando: copia tus datos cuanto antes y sustitúyelo.")
+                         detail: L("\(kind). SMART indica que el disco está fallando: copia tus datos cuanto antes y sustitúyelo."))
         case "Not Supported":
             return .init(id: "smart-\(id)", group: .disks, title: title, status: .info,
-                         detail: "\(kind). macOS no puede leer su estado SMART (habitual en discos por USB).")
+                         detail: L("\(kind). macOS no puede leer su estado SMART (habitual en discos por USB)."))
         default:
             return .init(id: "smart-\(id)", group: .disks, title: title, status: .info,
-                         detail: "\(kind). SMART: \(smart.isEmpty ? "desconocido" : smart).")
+                         detail: L("\(kind). SMART: \(smart.isEmpty ? L("desconocido") : smart)."))
         }
     }
 
@@ -262,16 +263,16 @@ public enum HealthScanner {
     }
 
     public static func evaluateFreeSpace(free: Int64, total: Int64) -> HealthCheck {
-        let title = "Espacio libre en el disco de arranque"
-        guard total > 0 else { return .init(id: "space", group: .disks, title: title, status: .info, detail: "No se pudo leer.") }
+        let title = L("Espacio libre en el disco de arranque")
+        guard total > 0 else { return .init(id: "space", group: .disks, title: title, status: .info, detail: L("No se pudo leer.")) }
         let pct = Double(free) / Double(total)
-        let text = "\(Fmt.bytes(free)) libres de \(Fmt.bytes(total)) (\(Int((pct * 100).rounded())) %)."
+        let text = L("\(Fmt.bytes(free)) libres de \(Fmt.bytes(total)) (\(Int((pct * 100).rounded())) %).")
         if pct < 0.10 {
             return .init(id: "space", group: .disks, title: title, status: .bad,
-                         detail: text + " Con tan poco espacio macOS se ralentiza y las actualizaciones pueden fallar.")
+                         detail: text + " " + L("Con tan poco espacio macOS se ralentiza y las actualizaciones pueden fallar."))
         }
         if pct < 0.20 {
-            return .init(id: "space", group: .disks, title: title, status: .warning, detail: text + " Conviene liberar algo de espacio.")
+            return .init(id: "space", group: .disks, title: title, status: .warning, detail: text + " " + L("Conviene liberar algo de espacio."))
         }
         return .init(id: "space", group: .disks, title: title, status: .good, detail: text)
     }
@@ -292,18 +293,18 @@ public enum HealthScanner {
     }
 
     public static func evaluateMemory(freePercent: Int?, swapUsed: Int64, total: Int64) -> HealthCheck {
-        let title = "Memoria"
-        var parts = ["\(Fmt.bytes(total)) en total"]
+        let title = L("Memoria")
+        var parts = [L("\(Fmt.bytes(total)) en total")]
         if let f = freePercent { parts.append("\(f) % libre") }
-        parts.append("swap en uso: \(Fmt.bytes(swapUsed))")
+        parts.append(L("swap en uso: \(Fmt.bytes(swapUsed))"))
         let base = parts.joined(separator: " · ") + "."
         if let f = freePercent, f < 10 {
             return .init(id: "memory", group: .system, title: title, status: .warning,
-                         detail: base + " La memoria va justa: mira en Arranque qué servicios de fondo puedes parar.")
+                         detail: base + " " + L("La memoria va justa: mira en Arranque qué servicios de fondo puedes parar."))
         }
         if swapUsed > total / 2 {
             return .init(id: "memory", group: .system, title: title, status: .warning,
-                         detail: base + " Usa mucho swap: el Mac escribe en disco lo que no le cabe en memoria.")
+                         detail: base + " " + L("Usa mucho swap: el Mac escribe en disco lo que no le cabe en memoria."))
         }
         return .init(id: "memory", group: .system, title: title, status: .good, detail: base)
     }
@@ -312,19 +313,19 @@ public enum HealthScanner {
         var tv = timeval()
         var size = MemoryLayout<timeval>.size
         guard sysctlbyname("kern.boottime", &tv, &size, nil, 0) == 0 else {
-            return .init(id: "uptime", group: .system, title: "Último reinicio", status: .info, detail: "No se pudo leer.")
+            return .init(id: "uptime", group: .system, title: L("Último reinicio"), status: .info, detail: L("No se pudo leer."))
         }
         return evaluateUptime(boot: Date(timeIntervalSince1970: TimeInterval(tv.tv_sec)), now: now)
     }
 
     public static func evaluateUptime(boot: Date, now: Date) -> HealthCheck {
         let days = now.timeIntervalSince(boot) / 86_400
-        let text = "Encendido desde \(Fmt.relative(boot, now: now))."
+        let text = L("Encendido desde \(Fmt.relative(boot, now: now)).")
         if days > 30 {
-            return .init(id: "uptime", group: .system, title: "Último reinicio", status: .info,
-                         detail: text + " Reiniciar de vez en cuando aplica actualizaciones pendientes y libera memoria.")
+            return .init(id: "uptime", group: .system, title: L("Último reinicio"), status: .info,
+                         detail: text + " " + L("Reiniciar de vez en cuando aplica actualizaciones pendientes y libera memoria."))
         }
-        return .init(id: "uptime", group: .system, title: "Último reinicio", status: .good, detail: text)
+        return .init(id: "uptime", group: .system, title: L("Último reinicio"), status: .good, detail: text)
     }
 
     /// Solo en portátiles (si `pmset -g batt` muestra una batería interna).
@@ -342,18 +343,18 @@ public enum HealthScanner {
             let k = parts[0].trimmingCharacters(in: .whitespaces)
             if fields[k] == nil { fields[k] = parts[1].trimmingCharacters(in: .whitespaces) }
         }
-        let cycles = fields["Cycle Count"].map { "\($0) ciclos" }
-        let capacity = fields["Maximum Capacity"].map { "capacidad máxima \($0)" }
+        let cycles = fields["Cycle Count"].map { L("\($0) ciclos") }
+        let capacity = fields["Maximum Capacity"].map { L("capacidad máxima \($0)") }
         let condition = fields["Condition"] ?? ""
         let info = [cycles, capacity].compactMap { $0 }.joined(separator: " · ")
         let pane = "x-apple.systempreferences:com.apple.Battery-Settings.extension"
         switch condition {
         case "Normal", "":
-            return .init(id: "battery", group: .system, title: "Batería", status: .good,
-                         detail: (info.isEmpty ? "Estado normal" : info.prefix(1).uppercased() + info.dropFirst()) + ".", settingsURL: pane)
+            return .init(id: "battery", group: .system, title: L("Batería"), status: .good,
+                         detail: (info.isEmpty ? L("Estado normal") : info.prefix(1).uppercased() + info.dropFirst()) + ".", settingsURL: pane)
         default:
-            return .init(id: "battery", group: .system, title: "Batería", status: .warning,
-                         detail: "Estado: \(condition)" + (info.isEmpty ? "" : " · \(info)") + ". Conviene revisarla en un servicio técnico.", settingsURL: pane)
+            return .init(id: "battery", group: .system, title: L("Batería"), status: .warning,
+                         detail: L("Estado: \(condition)") + (info.isEmpty ? "" : " · \(info)") + ". " + L("Conviene revisarla en un servicio técnico."), settingsURL: pane)
         }
     }
 }
@@ -414,12 +415,12 @@ public enum Fmt {
         let cal = Calendar.current
         let days = cal.dateComponents([.day], from: cal.startOfDay(for: date), to: cal.startOfDay(for: now)).day ?? 0
         switch days {
-        case ..<1: return "hoy"
-        case 1: return "ayer"
-        case 2..<30: return "hace \(days) días"
-        case 30..<60: return "hace 1 mes"
-        case 60..<365: return "hace \(days / 30) meses"
-        default: return "hace más de un año"
+        case ..<1: return L("hoy")
+        case 1: return L("ayer")
+        case 2..<30: return L("hace \(days) días")
+        case 30..<60: return L("hace 1 mes")
+        case 60..<365: return L("hace \(days / 30) meses")
+        default: return L("hace más de un año")
         }
     }
 }

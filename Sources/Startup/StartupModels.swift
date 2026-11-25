@@ -14,19 +14,19 @@ public struct StartupItem: Identifiable, Hashable, Sendable {
 
         public var title: String {
             switch self {
-            case .userAgent: "Tus agentes"
-            case .globalAgent: "Agentes para todos los usuarios"
-            case .appManaged: "Registrados por apps"
-            case .daemon: "Servicios del sistema (root)"
+            case .userAgent: L("Tus agentes")
+            case .globalAgent: L("Agentes para todos los usuarios")
+            case .appManaged: L("Registrados por apps")
+            case .daemon: L("Servicios del sistema (root)")
             }
         }
 
         public var subtitle: String {
             switch self {
-            case .userAgent: "~/Library/LaunchAgents. Se arrancan al iniciar tu sesión."
-            case .globalAgent: "/Library/LaunchAgents. Desactivarlos aquí solo afecta a tu usuario."
-            case .appManaged: "La propia app los registra; se activan o desactivan en Ajustes › Ítems de inicio."
-            case .daemon: "/Library/LaunchDaemons. Corren como root desde el arranque; desactivarlos o reactivarlos pide tu contraseña de administrador."
+            case .userAgent: L("~/Library/LaunchAgents. Se arrancan al iniciar tu sesión.")
+            case .globalAgent: L("/Library/LaunchAgents. Desactivarlos aquí solo afecta a tu usuario.")
+            case .appManaged: L("La propia app los registra; se activan o desactivan en Ajustes › Ítems de inicio.")
+            case .daemon: L("/Library/LaunchDaemons. Corren como root desde el arranque; desactivarlos o reactivarlos pide tu contraseña de administrador.")
             }
         }
 

@@ -23,6 +23,7 @@ extension View {
     /// Texto bajo una sección del formulario: pequeño, gris y alineado a la izquierda
     /// (si no, hereda el tamaño del cuerpo y parece un título).
     func footerStyle() -> some View {
-        font(.uiCaption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+        font(.uiCaption).foregroundStyle(.secondary).multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

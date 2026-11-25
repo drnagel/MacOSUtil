@@ -36,7 +36,7 @@ public enum Homebrew {
 
     /// Ejecuta `brew <args>` y va pasando cada línea de salida a `onLine`.
     public static func run(_ args: [String], onLine: (@Sendable (String) -> Void)? = nil) async -> RunResult {
-        guard let brew = path else { return RunResult(status: -1, output: "Homebrew no está instalado.") }
+        guard let brew = path else { return RunResult(status: -1, output: L("Homebrew no está instalado.")) }
         return await withCheckedContinuation { cont in
             let p = Process()
             p.executableURL = URL(fileURLWithPath: brew)
@@ -65,17 +65,17 @@ public enum Homebrew {
     }
 
     public static func install(_ token: String, onLine: (@Sendable (String) -> Void)? = nil) async -> RunResult {
-        guard isValidToken(token) else { return RunResult(status: -1, output: "Token no válido") }
+        guard isValidToken(token) else { return RunResult(status: -1, output: L("Token no válido")) }
         return await run(["install", "--cask", token], onLine: onLine)
     }
 
     public static func upgrade(_ token: String, onLine: (@Sendable (String) -> Void)? = nil) async -> RunResult {
-        guard isValidToken(token) else { return RunResult(status: -1, output: "Token no válido") }
+        guard isValidToken(token) else { return RunResult(status: -1, output: L("Token no válido")) }
         return await run(["upgrade", "--cask", token], onLine: onLine)
     }
 
     public static func uninstall(_ token: String, onLine: (@Sendable (String) -> Void)? = nil) async -> RunResult {
-        guard isValidToken(token) else { return RunResult(status: -1, output: "Token no válido") }
+        guard isValidToken(token) else { return RunResult(status: -1, output: L("Token no válido")) }
         return await run(["uninstall", "--cask", token], onLine: onLine)
     }
 
@@ -127,7 +127,8 @@ public enum Homebrew {
                                      installed: c["installed"] as? String,
                                      outdated: c["outdated"] as? Bool ?? false,
                                      appPaths: appPaths,
-                                     needsAdmin: needsAdmin)
+                                     needsAdmin: needsAdmin,
+                                     minMacOS: minMacOS(c["depends_on"]))
         }
         return result
     }
@@ -159,6 +160,13 @@ public enum Homebrew {
         return candidates.first(where: fm.fileExists(atPath:))
     }
 
+    /// `"depends_on": {"macos": {">=": ["14"]}}` → 14. Versiones como «13.5» se quedan en el mayor.
+    static func minMacOS(_ dependsOn: Any?) -> Int? {
+        guard let d = dependsOn as? [String: Any], let m = d["macos"] as? [String: Any],
+              let list = (m[">="] ?? m["=="]) as? [String] else { return nil }
+        return list.compactMap { Int($0.split(separator: ".").first ?? "") }.min()
+    }
+
     // MARK: Terminal
 
     static func shellQuote(_ s: String) -> String { "'" + s.replacingOccurrences(of: "'", with: "'\\''") + "'" }
@@ -180,7 +188,7 @@ public enum Homebrew {
             else { return false }
             lines.append(([brew] + args).map(shellQuote).joined(separator: " "))
         }
-        lines += ["echo", "echo 'Terminado. Vuelve a MacOSUtil y pulsa «Volver a comprobar».'", "read -k1 '?Pulsa una tecla para cerrar…'",
+        lines += ["echo", "echo " + shellQuote(L("Terminado. Vuelve a MacOSUtil y pulsa «Volver a comprobar».")), "read -k1 " + shellQuote("?" + L("Pulsa una tecla para cerrar…")),
                   "rm -f \"$0\""]
         do {
             try lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)

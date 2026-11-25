@@ -1,75 +1,120 @@
 {
   "id": "privacy",
-  "title": "Privacidad",
+  "title": { "en": "Privacy", "es": "Privacidad" },
   "icon": "hand.raised",
   "order": 60,
   "tweaks": [
     {
       "id": "privacy.no-personalized-ads",
-      "title": "Sin anuncios personalizados de Apple",
-      "description": "Apple deja de usar tu actividad para personalizar los anuncios de App Store, Apple News y Bolsa.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.AdLib", "key": "allowApplePersonalizedAdvertising", "valueType": "bool", "value": false }]
+      "title": { "en": "No personalized ads from Apple", "es": "Sin anuncios personalizados de Apple" },
+      "description": { "en": "Apple stops using your activity to personalize ads in the App Store, Apple News and Stocks.", "es": "Apple deja de usar tu actividad para personalizar los anuncios de App Store, Apple News y Bolsa." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.AdLib",
+          "key": "allowApplePersonalizedAdvertising",
+          "valueType": "bool",
+          "value": false
+        }
+      ]
     },
     {
       "id": "privacy.no-ad-identifier",
-      "title": "Sin identificador de publicidad",
-      "description": "Las apps no reciben el identificador que permite seguirte entre apps para mostrarte anuncios.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.AdLib", "key": "allowIdentifierForAdvertising", "valueType": "bool", "value": false }]
+      "title": { "en": "No advertising identifier", "es": "Sin identificador de publicidad" },
+      "description": { "en": "Apps don't get the identifier that lets them track you across apps to show ads.", "es": "Las apps no reciben el identificador que permite seguirte entre apps para mostrarte anuncios." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.AdLib",
+          "key": "allowIdentifierForAdvertising",
+          "valueType": "bool",
+          "value": false
+        }
+      ]
     },
     {
       "id": "privacy.no-search-sharing",
-      "title": "No compartir búsquedas con Apple",
-      "description": "Lo que buscas en Spotlight y Safari no se envía a Apple para «mejorar la búsqueda».",
-      "actions": [{ "type": "defaults", "domain": "com.apple.assistant.support", "key": "Search Queries Data Sharing Status", "valueType": "int", "value": 2 }]
+      "title": { "en": "Don't share searches with Apple", "es": "No compartir búsquedas con Apple" },
+      "description": { "en": "What you search for in Spotlight and Safari isn't sent to Apple to “improve search”.", "es": "Lo que buscas en Spotlight y Safari no se envía a Apple para «mejorar la búsqueda»." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.assistant.support",
+          "key": "Search Queries Data Sharing Status",
+          "valueType": "int",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "privacy.no-lookup-suggestions",
-      "title": "Sin sugerencias en Consultar",
-      "description": "Al consultar una palabra (toque con tres dedos o ⌃⌘D) no se envía a Apple para buscar sugerencias en internet.",
-      "actions": [{ "type": "defaults", "domain": "com.apple.lookup.shared", "key": "LookupSuggestionsDisabled", "valueType": "bool", "value": true }]
+      "title": { "en": "No suggestions in Look Up", "es": "Sin sugerencias en Consultar" },
+      "description": { "en": "Looking up a word (three-finger tap or ⌃⌘D) doesn't send it to Apple for online suggestions.", "es": "Al consultar una palabra (toque con tres dedos o ⌃⌘D) no se envía a Apple para buscar sugerencias en internet." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.lookup.shared",
+          "key": "LookupSuggestionsDisabled",
+          "valueType": "bool",
+          "value": true
+        }
+      ]
     },
     {
       "id": "privacy.terminal-secure-keyboard",
-      "title": "Entrada segura en Terminal",
-      "description": "Mientras Terminal está en primer plano, ninguna otra app puede leer lo que escribes (contraseñas incluidas).",
-      "actions": [{ "type": "defaults", "domain": "com.apple.Terminal", "key": "SecureKeyboardEntry", "valueType": "bool", "value": true }]
+      "title": { "en": "Secure keyboard entry in Terminal", "es": "Entrada segura en Terminal" },
+      "description": { "en": "While Terminal is in front, no other app can read what you type (passwords included).", "es": "Mientras Terminal está en primer plano, ninguna otra app puede leer lo que escribes (contraseñas incluidas)." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "com.apple.Terminal",
+          "key": "SecureKeyboardEntry",
+          "valueType": "bool",
+          "value": true
+        }
+      ]
     }
   ],
   "links": [
     {
       "id": "privacy.analytics",
-      "title": "Análisis y mejoras",
-      "description": "Dejar de compartir con Apple y con los desarrolladores los análisis del Mac y los informes de fallos.",
+      "title": { "en": "Analytics & Improvements", "es": "Análisis y mejoras" },
+      "description": { "en": "Stop sharing Mac analytics and crash reports with Apple and developers.", "es": "Dejar de compartir con Apple y con los desarrolladores los análisis del Mac y los informes de fallos." },
       "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_Analytics"
     },
     {
       "id": "privacy.location",
-      "title": "Localización",
-      "description": "Qué apps y servicios del sistema pueden saber dónde estás.",
+      "title": { "en": "Location Services", "es": "Localización" },
+      "description": { "en": "Which apps and system services can know where you are.", "es": "Qué apps y servicios del sistema pueden saber dónde estás." },
       "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices"
     },
     {
       "id": "privacy.siri",
-      "title": "Siri y Apple Intelligence",
-      "description": "Activar o desactivar Siri, «Oye Siri» y lo que aprende de tus apps.",
+      "title": { "en": "Siri & Apple Intelligence", "es": "Siri y Apple Intelligence" },
+      "description": { "en": "Turn Siri and “Hey Siri” on or off, and control what it learns from your apps.", "es": "Activar o desactivar Siri, «Oye Siri» y lo que aprende de tus apps." },
       "url": "x-apple.systempreferences:com.apple.Siri-Settings.extension"
     },
     {
       "id": "privacy.spotlight",
-      "title": "Spotlight",
-      "description": "Qué categorías aparecen en los resultados y si se muestran sugerencias de internet.",
+      "title": { "en": "Spotlight", "es": "Spotlight" },
+      "description": { "en": "Which categories show up in results and whether online suggestions are shown.", "es": "Qué categorías aparecen en los resultados y si se muestran sugerencias de internet." },
       "url": "x-apple.systempreferences:com.apple.Spotlight-Settings.extension"
     },
     {
       "id": "privacy.full-disk-access",
-      "title": "Acceso total al disco",
-      "description": "Revisar qué apps pueden leer todos tus archivos (Mail, mensajes, copias de seguridad…).",
+      "title": { "en": "Full Disk Access", "es": "Acceso total al disco" },
+      "description": { "en": "Review which apps can read all your files (Mail, messages, backups…).", "es": "Revisar qué apps pueden leer todos tus archivos (Mail, mensajes, copias de seguridad…)." },
       "url": "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
     },
     {
       "id": "privacy.login-items",
-      "title": "Ítems de inicio y en segundo plano",
-      "description": "Qué apps arrancan solas y cuáles pueden ejecutarse en segundo plano.",
+      "title": { "en": "Login Items & Background", "es": "Ítems de inicio y en segundo plano" },
+      "description": { "en": "Which apps open at login and which can run in the background.", "es": "Qué apps arrancan solas y cuáles pueden ejecutarse en segundo plano." },
       "url": "x-apple.systempreferences:com.apple.LoginItems-Settings.extension"
     }
   ]

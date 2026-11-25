@@ -1,51 +1,115 @@
 {
   "id": "keyboard",
-  "title": "Teclado y trackpad",
+  "title": { "en": "Keyboard and trackpad", "es": "Teclado y trackpad" },
   "icon": "keyboard",
   "order": 30,
   "tweaks": [
     {
       "id": "keyboard.repeat-on-hold",
-      "title": "Repetir la tecla al mantenerla",
-      "description": "Mantener una tecla la repite en lugar de mostrar el menú de acentos (útil en editores y juegos).",
+      "title": { "en": "Repeat keys when held", "es": "Repetir la tecla al mantenerla" },
+      "description": { "en": "Holding a key repeats it instead of showing the accent menu (useful in editors and games).", "es": "Mantener una tecla la repite en lugar de mostrar el menú de acentos (útil en editores y juegos)." },
+      "tested": "27",
       "risk": "medium",
-      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "ApplePressAndHoldEnabled", "valueType": "bool", "value": false }],
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "ApplePressAndHoldEnabled",
+          "valueType": "bool",
+          "value": false
+        }
+      ],
       "logout": true
     },
     {
       "id": "keyboard.fast-repeat",
-      "title": "Repetición de teclas rápida",
-      "description": "Repetición más rápida y menos espera antes de empezar a repetir que el máximo de Ajustes.",
+      "title": { "en": "Fast key repeat", "es": "Repetición de teclas rápida" },
+      "description": { "en": "Faster repeat and a shorter delay before repeating than the maximum in System Settings.", "es": "Repetición más rápida y menos espera antes de empezar a repetir que el máximo de Ajustes." },
+      "tested": "27",
       "risk": "medium",
       "actions": [
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "KeyRepeat", "valueType": "int", "value": 2 },
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "InitialKeyRepeat", "valueType": "int", "value": 15 }
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "KeyRepeat",
+          "valueType": "int",
+          "value": 2
+        },
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "InitialKeyRepeat",
+          "valueType": "int",
+          "value": 15
+        }
       ],
       "logout": true
     },
     {
       "id": "keyboard.no-smart-punctuation",
-      "title": "Sin comillas ni guiones automáticos",
-      "description": "No convierte \" en comillas tipográficas ni -- en guion largo. Evita errores al escribir código o comandos.",
+      "title": { "en": "No smart quotes or dashes", "es": "Sin comillas ni guiones automáticos" },
+      "description": { "en": "Stops turning \" into curly quotes and -- into an em dash. Avoids mistakes when typing code or commands.", "es": "No convierte \" en comillas tipográficas ni -- en guion largo. Evita errores al escribir código o comandos." },
+      "tested": "27",
       "actions": [
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticQuoteSubstitutionEnabled", "valueType": "bool", "value": false },
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticDashSubstitutionEnabled", "valueType": "bool", "value": false }
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSAutomaticQuoteSubstitutionEnabled",
+          "valueType": "bool",
+          "value": false
+        },
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSAutomaticDashSubstitutionEnabled",
+          "valueType": "bool",
+          "value": false
+        }
       ]
     },
     {
       "id": "keyboard.no-autocorrect",
-      "title": "Sin autocorrección",
-      "description": "Desactiva la corrección automática de palabras mientras escribes.",
-      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticSpellingCorrectionEnabled", "valueType": "bool", "value": false }]
+      "title": { "en": "No autocorrect", "es": "Sin autocorrección" },
+      "description": { "en": "Turns off automatic spelling correction while you type.", "es": "Desactiva la corrección automática de palabras mientras escribes." },
+      "tested": "27",
+      "actions": [
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "NSAutomaticSpellingCorrectionEnabled",
+          "valueType": "bool",
+          "value": false
+        }
+      ]
     },
     {
       "id": "keyboard.tap-to-click",
-      "title": "Tocar para hacer clic",
-      "description": "Un toque suave en el trackpad equivale a un clic, sin tener que presionarlo.",
+      "title": { "en": "Tap to click", "es": "Tocar para hacer clic" },
+      "description": { "en": "A light tap on the trackpad counts as a click, without pressing it down.", "es": "Un toque suave en el trackpad equivale a un clic, sin tener que presionarlo." },
+      "tested": "27",
       "actions": [
-        { "type": "defaults", "domain": "com.apple.AppleMultitouchTrackpad", "key": "Clicking", "valueType": "bool", "value": true },
-        { "type": "defaults", "domain": "com.apple.driver.AppleBluetoothMultitouch.trackpad", "key": "Clicking", "valueType": "bool", "value": true },
-        { "type": "defaults", "domain": "NSGlobalDomain", "key": "com.apple.mouse.tapBehavior", "valueType": "int", "value": 1, "currentHost": true }
+        {
+          "type": "defaults",
+          "domain": "com.apple.AppleMultitouchTrackpad",
+          "key": "Clicking",
+          "valueType": "bool",
+          "value": true
+        },
+        {
+          "type": "defaults",
+          "domain": "com.apple.driver.AppleBluetoothMultitouch.trackpad",
+          "key": "Clicking",
+          "valueType": "bool",
+          "value": true
+        },
+        {
+          "type": "defaults",
+          "domain": "NSGlobalDomain",
+          "key": "com.apple.mouse.tapBehavior",
+          "valueType": "int",
+          "value": 1,
+          "currentHost": true
+        }
       ],
       "logout": true
     }

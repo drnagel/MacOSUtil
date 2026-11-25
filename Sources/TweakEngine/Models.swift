@@ -1,4 +1,5 @@
 import Foundation
+import CatalogText
 
 /// Un archivo del catálogo: una categoría con sus ajustes (`Catalog/tweaks/<categoria>.json`).
 public struct TweakCategory: Codable, Identifiable, Hashable, Sendable {
@@ -16,7 +17,7 @@ public struct TweakCategory: Codable, Identifiable, Hashable, Sendable {
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
-        title = try c.decode(String.self, forKey: .title)
+        title = try c.decodeLocalized(forKey: .title)
         icon = try c.decode(String.self, forKey: .icon)
         order = try c.decode(Int.self, forKey: .order)
         tweaks = try c.decodeIfPresent([Tweak].self, forKey: .tweaks) ?? []
@@ -30,6 +31,16 @@ public struct SettingsPaneLink: Codable, Identifiable, Hashable, Sendable {
     public let title: String
     public let description: String
     public let url: String
+
+    enum CodingKeys: String, CodingKey { case id, title, description, url }
+
+    public init(from d: Decoder) throws {
+        let c = try d.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeLocalized(forKey: .title)
+        description = try c.decodeLocalized(forKey: .description)
+        url = try c.decode(String.self, forKey: .url)
+    }
 
     public static let scheme = "x-apple.systempreferences"
 
@@ -45,9 +56,9 @@ public enum Risk: String, Codable, Sendable, Comparable {
 
     public var title: String {
         switch self {
-        case .low: "Bajo"
-        case .medium: "Medio"
-        case .high: "Alto"
+        case .low: L("Bajo")
+        case .medium: L("Medio")
+        case .high: L("Alto")
         }
     }
 
@@ -86,34 +97,46 @@ public struct Tweak: Codable, Identifiable, Hashable, Sendable {
     /// Necesita privilegios de administrador (helper; Fase 2). En Fase 0 todos son `false`.
     public let admin: Bool
     public let macos: MacOSRange?
+    /// Última versión mayor de macOS en la que se comprobó el ajuste («27»). En versiones más nuevas se puede
+    /// aplicar igual, pero la app avisa de que no está probado.
+    public let tested: String?
     public let actions: [TweakAction]
     /// Procesos a reiniciar (`killall`) tras aplicar o revertir: "Finder", "Dock", "SystemUIServer"…
     public let restart: [String]
     /// El cambio solo se nota del todo tras cerrar sesión o reabrir las apps.
     public let logout: Bool
 
-    enum CodingKeys: String, CodingKey { case id, title, description, risk, admin, macos, actions, restart, logout }
+    enum CodingKeys: String, CodingKey { case id, title, description, risk, admin, macos, tested, actions, restart, logout }
 
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
-        title = try c.decode(String.self, forKey: .title)
-        description = try c.decode(String.self, forKey: .description)
+        title = try c.decodeLocalized(forKey: .title)
+        description = try c.decodeLocalized(forKey: .description)
         risk = try c.decodeIfPresent(Risk.self, forKey: .risk) ?? .low
         admin = try c.decodeIfPresent(Bool.self, forKey: .admin) ?? false
         macos = try c.decodeIfPresent(MacOSRange.self, forKey: .macos)
+        tested = try c.decodeIfPresent(String.self, forKey: .tested)
         actions = try c.decode([TweakAction].self, forKey: .actions)
         restart = try c.decodeIfPresent([String].self, forKey: .restart) ?? []
         logout = try c.decodeIfPresent(Bool.self, forKey: .logout) ?? false
     }
 
     public init(id: String, title: String, description: String, risk: Risk = .low, admin: Bool = false,
-                macos: MacOSRange? = nil, actions: [TweakAction], restart: [String] = [], logout: Bool = false) {
+                macos: MacOSRange? = nil, tested: String? = nil, actions: [TweakAction], restart: [String] = [], logout: Bool = false) {
         self.id = id; self.title = title; self.description = description; self.risk = risk; self.admin = admin
-        self.macos = macos; self.actions = actions; self.restart = restart; self.logout = logout
+        self.macos = macos; self.tested = tested; self.actions = actions; self.restart = restart; self.logout = logout
     }
 
     public var isCompatible: Bool { macos?.contains(ProcessInfo.processInfo.operatingSystemVersion) ?? true }
+
+    /// La versión de macOS actual es más nueva que la última en la que se probó el ajuste.
+    public var isUntestedHere: Bool { Self.isUntested(tested: tested, onMajor: ProcessInfo.processInfo.operatingSystemVersion.majorVersion) }
+
+    public static func isUntested(tested: String?, onMajor major: Int) -> Bool {
+        guard let t = tested.flatMap({ Int($0.split(separator: ".").first ?? "") }) else { return false }
+        return major > t
+    }
 }
 
 /// Acción atómica. Lista cerrada de tipos: el catálogo nunca ejecuta comandos arbitrarios.

@@ -1,0 +1,31 @@
+name: Catalog
+
+# Every pull request that touches the catalog is validated before review:
+# structure, unique ids, settings links, profile references and EN/ES translations.
+on:
+  pull_request:
+    paths:
+      - "Catalog/**"
+      - "dist/**"
+      - "Sources/**"
+      - "Package.swift"
+  push:
+    branches: [main]
+    paths:
+      - "Catalog/**"
+      - "dist/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Validate catalog
+        run: .build/debug/MacOSUtil --catalog validate Catalog
+      - name: Verify signed bundle
+        run: .build/debug/MacOSUtil --catalog verify dist

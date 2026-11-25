@@ -41,8 +41,8 @@ public enum AdminCommand: Hashable, Sendable {
         case .daemonStart(let path):
             try Self.checkDaemonPlist(path)
         case .pmset(_, let setting, let value):
-            guard let range = Self.pmsetAllowed[setting] else { throw AdminError.rejected("Ajuste de energía no permitido: \(setting)") }
-            guard range.contains(value) else { throw AdminError.rejected("Valor fuera de rango para \(setting): \(value)") }
+            guard let range = Self.pmsetAllowed[setting] else { throw AdminError.rejected(L("Ajuste de energía no permitido: \(setting)")) }
+            guard range.contains(value) else { throw AdminError.rejected(L("Valor fuera de rango para \(setting): \(value)")) }
         case .spotlightIndexing(let v, _), .spotlightRebuild(let v):
             try Self.checkVolume(v)
         }
@@ -51,10 +51,10 @@ public enum AdminCommand: Hashable, Sendable {
     /// Etiquetas de launchd de terceros: sin espacios ni barras, y nunca de Apple.
     static func checkLabel(_ label: String) throws {
         guard label.range(of: #"^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$"#, options: .regularExpression) != nil else {
-            throw AdminError.rejected("Etiqueta de servicio no válida: \(label)")
+            throw AdminError.rejected(L("Etiqueta de servicio no válida: \(label)"))
         }
         guard !label.lowercased().hasPrefix("com.apple.") else {
-            throw AdminError.rejected("Los servicios de Apple no se tocan: \(label)")
+            throw AdminError.rejected(L("Los servicios de Apple no se tocan: \(label)"))
         }
     }
 
@@ -67,13 +67,13 @@ public enum AdminCommand: Hashable, Sendable {
     /// Solo plists que estén directamente en /Library/LaunchDaemons, sin `..` ni enlaces simbólicos.
     static func checkDaemonPlist(_ path: String) throws {
         guard isDaemonPlistPath(path) else {
-            throw AdminError.rejected("Ruta de daemon no permitida: \(path)")
+            throw AdminError.rejected(L("Ruta de daemon no permitida: \(path)"))
         }
         let name = (path as NSString).lastPathComponent
-        guard !name.lowercased().hasPrefix("com.apple.") else { throw AdminError.rejected("Los servicios de Apple no se tocan: \(name)") }
+        guard !name.lowercased().hasPrefix("com.apple.") else { throw AdminError.rejected(L("Los servicios de Apple no se tocan: \(name)")) }
         let attrs = try? FileManager.default.attributesOfItem(atPath: path)
         guard attrs?[.type] as? FileAttributeType == .typeRegular else {
-            throw AdminError.rejected("No es un archivo normal: \(path)")
+            throw AdminError.rejected(L("No es un archivo normal: \(path)"))
         }
     }
 
@@ -83,11 +83,11 @@ public enum AdminCommand: Hashable, Sendable {
         let std = (volume as NSString).standardizingPath
         guard std == volume, volume.hasPrefix("/Volumes/"), !volume.dropFirst(9).isEmpty,
               !volume.dropFirst(9).contains("/") else {
-            throw AdminError.rejected("Volumen no permitido: \(volume)")
+            throw AdminError.rejected(L("Volumen no permitido: \(volume)"))
         }
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: volume, isDirectory: &isDir), isDir.boolValue else {
-            throw AdminError.rejected("El volumen no está montado: \(volume)")
+            throw AdminError.rejected(L("El volumen no está montado: \(volume)"))
         }
     }
 
@@ -123,8 +123,8 @@ public enum AdminError: LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .rejected(let why): "MacOSUtil no ejecuta esto: \(why)"
-        case .cancelled: "Cancelado: no se cambió nada."
+        case .rejected(let why): L("MacOSUtil no ejecuta esto: \(why)")
+        case .cancelled: L("Cancelado: no se cambió nada.")
         case .failed(let why): why
         }
     }

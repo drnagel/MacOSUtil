@@ -36,7 +36,7 @@ public enum AdminRunner {
         let errText = String(decoding: errData, as: UTF8.self)
         if p.terminationStatus != 0 {
             if errText.contains("-128") || errText.localizedCaseInsensitiveContains("cancel") { throw AdminError.cancelled }
-            throw AdminError.failed("No se pudieron obtener permisos de administrador: \(errText.trimmingCharacters(in: .whitespacesAndNewlines))")
+            throw AdminError.failed(L("No se pudieron obtener permisos de administrador: \(errText.trimmingCharacters(in: .whitespacesAndNewlines))"))
         }
         return parse(String(decoding: data, as: UTF8.self), commands: commands)
     }
