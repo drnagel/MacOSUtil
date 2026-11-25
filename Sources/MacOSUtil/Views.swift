@@ -21,6 +21,8 @@ struct RootView: View {
                         if let c = app.catalog?.categories.first(where: { $0.id == id }) { CategoryView(category: c) }
                     case .apps:
                         AppsView()
+                    case .startup:
+                        StartupView()
                     case .disk:
                         DiskView()
                     case nil:
@@ -32,7 +34,7 @@ struct RootView: View {
         }
         .toolbar {
             ToolbarItem {
-                Button { app.refresh(); app.apps.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
+                Button { app.refresh(); app.apps.refresh(); app.startup.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
                     .help("Vuelve a leer el estado actual de cada ajuste (⌘R)")
             }
             ToolbarItem {
@@ -71,6 +73,9 @@ struct Sidebar: View {
                 Label("Apps", systemImage: "square.grid.2x2")
                     .badge(app.apps.installedCount)   // 0 (o aún sin consultar) no muestra contador
                     .tag(SidebarItem.apps)
+                Label("Arranque", systemImage: "power")
+                    .badge(app.startup.running.count)
+                    .tag(SidebarItem.startup)
                 Label("Espacio en disco", systemImage: "internaldrive").tag(SidebarItem.disk)
             }
         }

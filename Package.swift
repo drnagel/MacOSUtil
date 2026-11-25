@@ -15,9 +15,14 @@ let package = Package(
             name: "AppCatalog",
             path: "Sources/AppCatalog"
         ),
+        // Servicios que arrancan solos (launchd): listar, desactivar y reactivar.
+        .target(
+            name: "Startup",
+            path: "Sources/Startup"
+        ),
         .executableTarget(
             name: "MacOSUtil",
-            dependencies: ["TweakEngine", "AppCatalog"],
+            dependencies: ["TweakEngine", "AppCatalog", "Startup"],
             path: "Sources/MacOSUtil"
         )
     ],

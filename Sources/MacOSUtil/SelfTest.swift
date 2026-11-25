@@ -1,6 +1,7 @@
 import Foundation
 import TweakEngine
 import AppCatalog
+import Startup
 
 /// `MacOSUtil --selftest`: valida el catálogo, muestra el estado de cada ajuste en este Mac y prueba
 /// aplicar → comprobar → revertir sobre un dominio de prueba (no toca ninguna preferencia real).
@@ -137,6 +138,29 @@ enum SelfTest {
         } catch {
             check(false, error.localizedDescription)
         }
+
+        // 5. Servicios de arranque: listado (solo lectura) y ciclo desactivar/reactivar con un agente temporal
+        print("== Arranque")
+        let t1 = Date()
+        let items = StartupScanner.scan()
+        check(true, "\(items.count) servicios de terceros (\(String(format: "%.1f", Date().timeIntervalSince(t1))) s)")
+        for scope in StartupItem.Scope.allCases {
+            let group = items.filter { $0.scope == scope }
+            guard !group.isEmpty else { continue }
+            print("  [\(scope.title)]")
+            for i in group {
+                var flags: [String] = []
+                if let pid = i.pid { flags.append("pid \(pid)") } else if i.loaded { flags.append("cargado") }
+                if let m = i.memory { flags.append(ByteCountFormatter.string(fromByteCount: m, countStyle: .memory)) }
+                if i.disabled { flags.append("DESACTIVADO") }
+                if i.isOrphan { flags.append("RESTO") }
+                flags += i.schedule
+                print("    \(i.displayName) · \(i.label) · \(flags.joined(separator: ", "))")
+            }
+        }
+        let tmpStore = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-startup-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tmpStore) }
+        for (msg, good) in StartupController.selfTestCycle(storeURL: tmpStore) { check(good, msg) }
 
         print(ok ? "OK" : "FALLÓ")
         return ok
