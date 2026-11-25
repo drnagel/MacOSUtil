@@ -19,6 +19,8 @@ struct RootView: View {
                     switch app.selection {
                     case .category(let id):
                         if let c = app.catalog?.categories.first(where: { $0.id == id }) { CategoryView(category: c) }
+                    case .apps:
+                        AppsView()
                     case .disk:
                         DiskView()
                     case nil:
@@ -30,7 +32,7 @@ struct RootView: View {
         }
         .toolbar {
             ToolbarItem {
-                Button { app.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
+                Button { app.refresh(); app.apps.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
                     .help("Vuelve a leer el estado actual de cada ajuste (⌘R)")
             }
             ToolbarItem {
@@ -66,6 +68,9 @@ struct Sidebar: View {
                 }
             }
             Section("Sistema") {
+                Label("Apps", systemImage: "square.grid.2x2")
+                    .badge(app.apps.statuses.isEmpty ? Text("") : Text("\(app.apps.installedCount)"))
+                    .tag(SidebarItem.apps)
                 Label("Espacio en disco", systemImage: "internaldrive").tag(SidebarItem.disk)
             }
         }

@@ -24,8 +24,8 @@ struct MacOSUtilApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandMenu("Ajustes") {
-                Button("Volver a comprobar") { app.refresh() }.keyboardShortcut("r", modifiers: .command)
-                Button("Recargar catálogo") { app.load() }.keyboardShortcut("r", modifiers: [.command, .shift])
+                Button("Volver a comprobar") { app.refresh(); app.apps.refresh() }.keyboardShortcut("r", modifiers: .command)
+                Button("Recargar catálogo") { app.load(); app.apps.load(); app.apps.refresh() }.keyboardShortcut("r", modifiers: [.command, .shift])
                 Divider()
                 Button("Abrir DiskTree") { DiskTreeLink.open() }.disabled(DiskTreeLink.appURL == nil)
             }

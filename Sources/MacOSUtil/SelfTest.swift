@@ -1,5 +1,6 @@
 import Foundation
 import TweakEngine
+import AppCatalog
 
 /// `MacOSUtil --selftest`: valida el catálogo, muestra el estado de cada ajuste en este Mac y prueba
 /// aplicar → comprobar → revertir sobre un dominio de prueba (no toca ninguna preferencia real).
@@ -97,7 +98,49 @@ enum SelfTest {
             check(false, "error inesperado: \(error.localizedDescription)")
         }
 
+        // 4. Catálogo de apps contra Homebrew (solo consulta, no instala nada)
+        print("== Apps")
+        do {
+            let apps = try AppCatalogFile.load(from: dir)
+            check(true, "\(apps.categories.count) categorías, \(apps.allApps.count) apps")
+            if Homebrew.isInstalled {
+                let tokens = apps.allApps.compactMap(\.cask)
+                let t0 = Date()
+                let info = blocking { await Homebrew.info(tokens) }
+                let missing = tokens.filter { info[$0] == nil }
+                check(missing.isEmpty, "\(tokens.count - missing.count)/\(tokens.count) casks existen en Homebrew (\(String(format: "%.1f", Date().timeIntervalSince(t0))) s)"
+                      + (missing.isEmpty ? "" : " · faltan: \(missing.joined(separator: ", "))"))
+                for a in apps.allApps {
+                    let st = Homebrew.status(of: a, info: info)
+                    let mark = switch st {
+                    case .brew(let v, let outdated): "brew \(v)\(outdated ? " (desactualizada)" : "")"
+                    case .manual: "instalada fuera de brew"
+                    case .notInstalled: "—"
+                    case .unavailable: "NO DISPONIBLE"
+                    case .unknown: "?"
+                    }
+                    let admin = a.cask.flatMap { info[$0]?.needsAdmin } == true ? " [pide contraseña]" : ""
+                    print("    \(a.name): \(mark)\(admin)")
+                }
+            } else {
+                print("  – Homebrew no está instalado: no se comprueban los casks")
+            }
+        } catch {
+            check(false, error.localizedDescription)
+        }
+
         print(ok ? "OK" : "FALLÓ")
         return ok
     }
+
+    /// Espera una tarea async desde el selftest (que corre en el hilo principal, sin interfaz).
+    private static func blocking<T: Sendable>(_ work: @escaping @Sendable () async -> T) -> T {
+        let box = Box<T>()
+        let sem = DispatchSemaphore(value: 0)
+        Task.detached { box.value = await work(); sem.signal() }
+        sem.wait()
+        return box.value!
+    }
+
+    private final class Box<T>: @unchecked Sendable { var value: T? }
 }

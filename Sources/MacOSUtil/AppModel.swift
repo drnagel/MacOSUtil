@@ -3,6 +3,7 @@ import TweakEngine
 
 enum SidebarItem: Hashable {
     case category(String)
+    case apps
     case disk
 }
 
@@ -12,6 +13,7 @@ final class AppModel {
     static let shared = AppModel()
 
     let engine = TweakEngine()
+    let apps = AppsModel()
     private(set) var catalog: Catalog?
     private(set) var loadError: String?
     private(set) var statuses: [String: TweakStatus] = [:]

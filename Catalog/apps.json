@@ -1,0 +1,92 @@
+{
+  "categories": [
+    {
+      "id": "windows",
+      "title": "Ventanas",
+      "icon": "rectangle.split.2x1",
+      "apps": [
+        { "name": "Rectangle", "cask": "rectangle", "description": "Coloca ventanas en mitades, tercios o esquinas con atajos de teclado o arrastrándolas al borde." },
+        { "name": "AltTab", "cask": "alt-tab", "description": "⌘⇥ como en Windows: muestra cada ventana con su vista previa, no solo cada app." },
+        { "name": "Loop", "cask": "loop", "description": "Organiza ventanas con un menú radial al mantener una tecla. Alternativa a Rectangle." }
+      ]
+    },
+    {
+      "id": "productivity",
+      "title": "Productividad",
+      "icon": "bolt",
+      "apps": [
+        { "name": "Raycast", "cask": "raycast", "description": "Lanzador que sustituye a Spotlight: apps, calculadora, portapapeles, atajos y extensiones." },
+        { "name": "Maccy", "cask": "maccy", "description": "Historial del portapapeles ligero y de código abierto (⇧⌘C)." },
+        { "name": "Itsycal", "cask": "itsycal", "description": "Calendario pequeño en la barra de menús con tus eventos." },
+        { "name": "Shottr", "cask": "shottr", "description": "Capturas de pantalla con anotaciones, OCR, medidas y desenfoque." }
+      ]
+    },
+    {
+      "id": "menubar",
+      "title": "Barra de menús",
+      "icon": "menubar.rectangle",
+      "apps": [
+        { "name": "Ice", "cask": "jordanbaird-ice", "description": "Oculta y ordena los iconos de la barra de menús; útil en MacBooks con notch." },
+        { "name": "Stats", "cask": "stats", "description": "CPU, memoria, disco, red, batería y temperaturas en la barra de menús." },
+        { "name": "KeepingYouAwake", "cask": "keepingyouawake", "description": "Evita que el Mac entre en reposo durante un tiempo, con un clic." }
+      ]
+    },
+    {
+      "id": "peripherals",
+      "title": "Ratón, teclado y pantallas",
+      "icon": "computermouse",
+      "apps": [
+        { "name": "LinearMouse", "cask": "linearmouse", "description": "Ajusta aceleración, velocidad y dirección del desplazamiento por dispositivo." },
+        { "name": "Mos", "cask": "mos", "description": "Desplazamiento suave con ratones de rueda, e invierte su dirección por separado del trackpad." },
+        { "name": "MonitorControl", "cask": "monitorcontrol", "description": "Brillo y volumen de monitores externos con las teclas del Mac." },
+        { "name": "BetterDisplay", "cask": "betterdisplay", "description": "Resoluciones HiDPI, escalado y ajustes avanzados de monitores externos." },
+        { "name": "Karabiner-Elements", "cask": "karabiner-elements", "description": "Reasigna teclas y crea atajos complejos. Instala un controlador: pide contraseña." }
+      ]
+    },
+    {
+      "id": "media",
+      "title": "Multimedia y archivos",
+      "icon": "play.rectangle",
+      "apps": [
+        { "name": "IINA", "cask": "iina", "description": "Reproductor de vídeo moderno que abre casi cualquier formato." },
+        { "name": "Keka", "cask": "keka", "description": "Comprime y descomprime 7z, rar, zip y más." },
+        { "name": "The Unarchiver", "cask": "the-unarchiver", "description": "Descomprime prácticamente cualquier formato de archivo." }
+      ]
+    },
+    {
+      "id": "system",
+      "title": "Sistema y seguridad",
+      "icon": "shield.lefthalf.filled",
+      "apps": [
+        { "name": "Pearcleaner", "cask": "pearcleaner", "description": "Desinstala apps junto con sus preferencias, cachés y restos." },
+        { "name": "AppCleaner", "cask": "appcleaner", "description": "Desinstalador clásico: arrastra una app y borra también sus archivos." },
+        { "name": "LuLu", "cask": "lulu", "description": "Firewall de salida: avisa cuando una app intenta conectarse a internet." },
+        { "name": "KnockKnock", "cask": "knockknock", "description": "Muestra todo lo que se ejecuta al arrancar el Mac, para detectar software no deseado." },
+        { "name": "BlockBlock", "cask": "blockblock", "description": "Avisa cuando algo intenta instalarse para arrancar solo." },
+        { "name": "Latest", "cask": "latest", "description": "Revisa si hay actualizaciones de las apps instaladas fuera de la App Store." },
+        { "name": "Amphetamine", "appStore": "937984704", "appName": "Amphetamine.app", "description": "Mantiene el Mac despierto con reglas (apps abiertas, descargas, pantalla externa…). Solo en App Store." }
+      ]
+    },
+    {
+      "id": "browsers",
+      "title": "Navegadores",
+      "icon": "globe",
+      "apps": [
+        { "name": "Firefox", "cask": "firefox", "description": "Navegador de código abierto de Mozilla." },
+        { "name": "Brave", "cask": "brave-browser", "description": "Basado en Chromium, con bloqueo de anuncios y rastreadores." },
+        { "name": "Google Chrome", "cask": "google-chrome", "description": "El navegador de Google." }
+      ]
+    },
+    {
+      "id": "dev",
+      "title": "Desarrollo",
+      "icon": "chevron.left.forwardslash.chevron.right",
+      "apps": [
+        { "name": "Ghostty", "cask": "ghostty", "description": "Terminal rápida y nativa, con pestañas y divisiones." },
+        { "name": "iTerm2", "cask": "iterm2", "description": "Terminal veterana con muchas funciones." },
+        { "name": "Visual Studio Code", "cask": "visual-studio-code", "description": "Editor de código de Microsoft." },
+        { "name": "OrbStack", "cask": "orbstack", "description": "Docker y máquinas Linux ligeras; alternativa rápida a Docker Desktop." }
+      ]
+    }
+  ]
+}

@@ -10,9 +10,14 @@ let package = Package(
             name: "TweakEngine",
             path: "Sources/TweakEngine"
         ),
+        // Catálogo de apps + Homebrew: detectar, instalar, actualizar y desinstalar.
+        .target(
+            name: "AppCatalog",
+            path: "Sources/AppCatalog"
+        ),
         .executableTarget(
             name: "MacOSUtil",
-            dependencies: ["TweakEngine"],
+            dependencies: ["TweakEngine", "AppCatalog"],
             path: "Sources/MacOSUtil"
         )
     ],
