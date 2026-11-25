@@ -1,0 +1,30 @@
+{
+  "id": "screenshots",
+  "title": "Capturas de pantalla",
+  "icon": "camera.viewfinder",
+  "order": 40,
+  "tweaks": [
+    {
+      "id": "screenshots.no-shadow",
+      "title": "Capturas de ventana sin sombra",
+      "description": "Las capturas de una ventana (⇧⌘4 y espacio) se guardan sin el borde de sombra.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.screencapture", "key": "disable-shadow", "valueType": "bool", "value": true }],
+      "restart": ["SystemUIServer"]
+    },
+    {
+      "id": "screenshots.no-thumbnail",
+      "title": "Sin miniatura flotante",
+      "description": "La captura se guarda al instante, sin la miniatura de la esquina que la retrasa unos segundos.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.screencapture", "key": "show-thumbnail", "valueType": "bool", "value": false }],
+      "restart": ["SystemUIServer"]
+    },
+    {
+      "id": "screenshots.jpg",
+      "title": "Guardar en JPG",
+      "description": "Archivos mucho más pequeños que PNG. Pierde algo de calidad en texto e interfaces.",
+      "risk": "medium",
+      "actions": [{ "type": "defaults", "domain": "com.apple.screencapture", "key": "type", "valueType": "string", "value": "jpg" }],
+      "restart": ["SystemUIServer"]
+    }
+  ]
+}

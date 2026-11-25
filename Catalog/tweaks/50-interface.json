@@ -1,0 +1,46 @@
+{
+  "id": "interface",
+  "title": "Interfaz",
+  "icon": "macwindow",
+  "order": 50,
+  "tweaks": [
+    {
+      "id": "interface.expanded-save-panel",
+      "title": "Diálogo de guardar expandido",
+      "description": "El diálogo de guardar se abre con el explorador de carpetas a la vista, sin tener que desplegarlo.",
+      "actions": [
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSNavPanelExpandedStateForSaveMode", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSNavPanelExpandedStateForSaveMode2", "valueType": "bool", "value": true }
+      ]
+    },
+    {
+      "id": "interface.expanded-print-panel",
+      "title": "Diálogo de imprimir expandido",
+      "description": "El diálogo de imprimir se abre con todas las opciones a la vista.",
+      "actions": [
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "PMPrintingExpandedStateForPrint", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "PMPrintingExpandedStateForPrint2", "valueType": "bool", "value": true }
+      ]
+    },
+    {
+      "id": "interface.save-to-disk",
+      "title": "Guardar en el Mac, no en iCloud",
+      "description": "Los documentos nuevos se guardan por defecto en el disco local en lugar de en iCloud Drive.",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSDocumentSaveNewDocumentsToCloud", "valueType": "bool", "value": false }]
+    },
+    {
+      "id": "interface.always-scrollbars",
+      "title": "Barras de desplazamiento siempre visibles",
+      "description": "Las barras de desplazamiento no se ocultan al dejar de moverte.",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "AppleShowScrollBars", "valueType": "string", "value": "Always" }],
+      "logout": true
+    },
+    {
+      "id": "interface.no-window-animations",
+      "title": "Sin animación al abrir ventanas",
+      "description": "Las ventanas y diálogos nuevos aparecen al instante, sin el efecto de zoom.",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticWindowAnimationsEnabled", "valueType": "bool", "value": false }],
+      "logout": true
+    }
+  ]
+}

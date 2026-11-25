@@ -1,0 +1,79 @@
+{
+  "id": "finder",
+  "title": "Finder",
+  "icon": "folder",
+  "order": 10,
+  "tweaks": [
+    {
+      "id": "finder.show-extensions",
+      "title": "Mostrar todas las extensiones",
+      "description": "Muestra la extensión de cada archivo (.pdf, .zip, .app…) en Finder y en los diálogos de abrir y guardar.",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "AppleShowAllExtensions", "valueType": "bool", "value": true }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.show-hidden-files",
+      "title": "Mostrar archivos ocultos",
+      "description": "Muestra los archivos que empiezan por punto (.git, .zshrc…). También se alterna con ⇧⌘. en Finder.",
+      "risk": "medium",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "AppleShowAllFiles", "valueType": "bool", "value": true }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.path-bar",
+      "title": "Barra de ruta",
+      "description": "Muestra abajo la ruta completa de la carpeta actual; se puede hacer clic en cada nivel.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "ShowPathbar", "valueType": "bool", "value": true }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.status-bar",
+      "title": "Barra de estado",
+      "description": "Muestra abajo cuántos elementos hay y el espacio libre del disco.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "ShowStatusBar", "valueType": "bool", "value": true }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.folders-first",
+      "title": "Carpetas primero",
+      "description": "Al ordenar por nombre, las carpetas aparecen antes que los archivos (en ventanas y en el escritorio).",
+      "actions": [
+        { "type": "defaults", "domain": "com.apple.finder", "key": "_FXSortFoldersFirst", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "com.apple.finder", "key": "_FXSortFoldersFirstOnDesktop", "valueType": "bool", "value": true }
+      ],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.search-current-folder",
+      "title": "Buscar en la carpeta actual",
+      "description": "La búsqueda de una ventana de Finder busca en esa carpeta en lugar de en todo el Mac.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "FXDefaultSearchScope", "valueType": "string", "value": "SCcf" }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.no-extension-warning",
+      "title": "Sin aviso al cambiar la extensión",
+      "description": "No pregunta «¿Seguro que quieres cambiar la extensión?» al renombrar un archivo.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "FXEnableExtensionChangeWarning", "valueType": "bool", "value": false }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.list-view",
+      "title": "Vista de lista por defecto",
+      "description": "Las carpetas que nunca abriste se muestran en lista. Las carpetas con vista guardada no cambian.",
+      "actions": [{ "type": "defaults", "domain": "com.apple.finder", "key": "FXPreferredViewStyle", "valueType": "string", "value": "Nlsv" }],
+      "restart": ["Finder"]
+    },
+    {
+      "id": "finder.no-ds-store-external",
+      "title": "Sin .DS_Store en red y USB",
+      "description": "Finder deja de crear archivos .DS_Store en unidades de red y discos externos.",
+      "actions": [
+        { "type": "defaults", "domain": "com.apple.desktopservices", "key": "DSDontWriteNetworkStores", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "com.apple.desktopservices", "key": "DSDontWriteUSBStores", "valueType": "bool", "value": true }
+      ],
+      "restart": ["Finder"],
+      "logout": true
+    }
+  ]
+}

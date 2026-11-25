@@ -1,0 +1,53 @@
+{
+  "id": "keyboard",
+  "title": "Teclado y trackpad",
+  "icon": "keyboard",
+  "order": 30,
+  "tweaks": [
+    {
+      "id": "keyboard.repeat-on-hold",
+      "title": "Repetir la tecla al mantenerla",
+      "description": "Mantener una tecla la repite en lugar de mostrar el menú de acentos (útil en editores y juegos).",
+      "risk": "medium",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "ApplePressAndHoldEnabled", "valueType": "bool", "value": false }],
+      "logout": true
+    },
+    {
+      "id": "keyboard.fast-repeat",
+      "title": "Repetición de teclas rápida",
+      "description": "Repetición más rápida y menos espera antes de empezar a repetir que el máximo de Ajustes.",
+      "risk": "medium",
+      "actions": [
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "KeyRepeat", "valueType": "int", "value": 2 },
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "InitialKeyRepeat", "valueType": "int", "value": 15 }
+      ],
+      "logout": true
+    },
+    {
+      "id": "keyboard.no-smart-punctuation",
+      "title": "Sin comillas ni guiones automáticos",
+      "description": "No convierte \" en comillas tipográficas ni -- en guion largo. Evita errores al escribir código o comandos.",
+      "actions": [
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticQuoteSubstitutionEnabled", "valueType": "bool", "value": false },
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticDashSubstitutionEnabled", "valueType": "bool", "value": false }
+      ]
+    },
+    {
+      "id": "keyboard.no-autocorrect",
+      "title": "Sin autocorrección",
+      "description": "Desactiva la corrección automática de palabras mientras escribes.",
+      "actions": [{ "type": "defaults", "domain": "NSGlobalDomain", "key": "NSAutomaticSpellingCorrectionEnabled", "valueType": "bool", "value": false }]
+    },
+    {
+      "id": "keyboard.tap-to-click",
+      "title": "Tocar para hacer clic",
+      "description": "Un toque suave en el trackpad equivale a un clic, sin tener que presionarlo.",
+      "actions": [
+        { "type": "defaults", "domain": "com.apple.AppleMultitouchTrackpad", "key": "Clicking", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "com.apple.driver.AppleBluetoothMultitouch.trackpad", "key": "Clicking", "valueType": "bool", "value": true },
+        { "type": "defaults", "domain": "NSGlobalDomain", "key": "com.apple.mouse.tapBehavior", "valueType": "int", "value": 1, "currentHost": true }
+      ],
+      "logout": true
+    }
+  ]
+}
