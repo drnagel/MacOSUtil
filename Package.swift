@@ -15,9 +15,15 @@ let package = Package(
             name: "AppCatalog",
             path: "Sources/AppCatalog"
         ),
+        // Operaciones de administrador (lista cerrada, contraseña por lote), energía (pmset) y Spotlight (mdutil).
+        .target(
+            name: "Privileged",
+            path: "Sources/Privileged"
+        ),
         // Servicios que arrancan solos (launchd): listar, desactivar y reactivar.
         .target(
             name: "Startup",
+            dependencies: ["Privileged"],
             path: "Sources/Startup"
         ),
         // Perfiles del asistente y archivos de configuración exportados. Solo ids: no depende de los otros módulos.
@@ -27,7 +33,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "MacOSUtil",
-            dependencies: ["TweakEngine", "AppCatalog", "Startup", "Profiles"],
+            dependencies: ["TweakEngine", "AppCatalog", "Startup", "Profiles", "Privileged"],
             path: "Sources/MacOSUtil"
         )
     ],

@@ -1,6 +1,9 @@
 import Foundation
+import Privileged
 
-/// Desactiva y reactiva agentes de launchd en tu sesión (dominio gui/<uid>), sin contraseña.
+/// Desactiva y reactiva servicios de launchd de terceros.
+/// - Agentes (dominio gui/<uid>): sin contraseña.
+/// - Daemons de /Library/LaunchDaemons (dominio system): con `AdminRunner`, que pide la contraseña una vez por lote.
 ///
 /// Desactivar = `launchctl disable` (no vuelve a arrancar, ni tras reiniciar) + `launchctl bootout` (se detiene ya).
 /// Reactivar = `launchctl enable` + `launchctl bootstrap` con su plist (arranca otra vez).
@@ -39,30 +42,86 @@ public final class StartupController: @unchecked Sendable {
     // MARK: Acciones
 
     public func disable(_ item: StartupItem) throws {
-        guard item.scope.canToggle, let plist = item.plistPath else {
+        guard item.canToggle, let plist = item.plistPath else {
             throw StartupError.notAllowed("«\(item.displayName)» no se puede desactivar desde aquí: \(item.scope.subtitle)")
         }
-        let target = "\(item.scope.domain)/\(item.label)"
-        let r = Launchctl.run(["disable", target])
-        guard r.ok else { throw StartupError.launchctl(r.output.trimmingCharacters(in: .whitespacesAndNewlines)) }
-        // Si no estaba cargado, bootout falla; no importa: ya no arrancará.
-        Launchctl.run(["bootout", target])
+        if item.scope.needsAdmin {
+            try Self.checkDaemon(plist)
+            let outcomes = try AdminRunner.run([.daemonDisable(label: item.label), .daemonStop(label: item.label)],
+                                               reason: "MacOSUtil quiere desactivar el servicio «\(item.displayName)».")
+            try Self.check(outcomes)
+        } else {
+            let target = "\(item.scope.domain)/\(item.label)"
+            let r = Launchctl.run(["disable", target])
+            guard r.ok else { throw StartupError.launchctl(r.output.trimmingCharacters(in: .whitespacesAndNewlines)) }
+            // Si no estaba cargado, bootout falla; no importa: ya no arrancará.
+            Launchctl.run(["bootout", target])
+        }
         try save { $0.disabled[item.label] = Record(label: item.label, scope: item.scope, plistPath: plist, disabledAt: Date()) }
     }
 
     public func enable(_ item: StartupItem) throws {
-        guard item.scope.canToggle, let plist = item.plistPath else {
+        guard item.canToggle, let plist = item.plistPath else {
             throw StartupError.notAllowed("«\(item.displayName)» no se puede activar desde aquí.")
         }
-        try enable(label: item.label, scope: item.scope, plistPath: plist)
+        if item.scope.needsAdmin {
+            try Self.checkDaemon(plist)
+            let outcomes = try AdminRunner.run(Self.enableCommands(label: item.label, plistPath: plist),
+                                               reason: "MacOSUtil quiere reactivar el servicio «\(item.displayName)».")
+            try Self.check(outcomes)
+            try save { $0.disabled[item.label] = nil }
+        } else {
+            try enable(label: item.label, scope: item.scope, plistPath: plist)
+        }
+    }
+
+    /// Antes de pedir la contraseña: solo daemons con su plist en /Library/LaunchDaemons.
+    static func checkDaemon(_ plistPath: String) throws {
+        guard AdminCommand.isDaemonPlistPath(plistPath) else {
+            throw AdminError.rejected("el plist no está en /Library/LaunchDaemons: \(plistPath)")
+        }
+    }
+
+    static func enableCommands(label: String, plistPath: String) -> [AdminCommand] {
+        var cmds: [AdminCommand] = [.daemonEnable(label: label)]
+        if FileManager.default.fileExists(atPath: plistPath) { cmds.append(.daemonStart(plistPath: plistPath)) }
+        return cmds
+    }
+
+    static func check(_ outcomes: [AdminRunner.Outcome]) throws {
+        if let bad = outcomes.first(where: { !$0.ok }) {
+            throw StartupError.launchctl(bad.output.isEmpty ? "launchctl terminó con código \(bad.status)" : bad.output)
+        }
     }
 
     /// Reactiva todo lo que desactivó MacOSUtil. Devuelve los errores por etiqueta.
+    /// Los daemons van en un solo lote: una sola petición de contraseña.
     public func enableAll() -> [(label: String, error: String)] {
         var errors: [(String, String)] = []
-        for r in records {
+        let all = records
+        for r in all where !r.scope.needsAdmin {
             do { try enable(label: r.label, scope: r.scope, plistPath: r.plistPath) }
             catch { errors.append((r.label, error.localizedDescription)) }
+        }
+        var daemons: [Record] = []
+        for d in all where d.scope.needsAdmin {
+            do { try Self.checkDaemon(d.plistPath); daemons.append(d) } catch { errors.append((d.label, error.localizedDescription)) }
+        }
+        guard !daemons.isEmpty else { return errors }
+        var batch: [(label: String, commands: [AdminCommand])] = []
+        for d in daemons { batch.append((d.label, Self.enableCommands(label: d.label, plistPath: d.plistPath))) }
+        do {
+            let outcomes = try AdminRunner.run(batch.flatMap(\.commands),
+                                               reason: "MacOSUtil quiere reactivar \(daemons.count) \(daemons.count == 1 ? "servicio" : "servicios") del sistema.")
+            var i = 0
+            for b in batch {
+                let mine = Array(outcomes[i..<(i + b.commands.count)])
+                i += b.commands.count
+                do { try Self.check(mine); try save { $0.disabled[b.label] = nil } }
+                catch { errors.append((b.label, error.localizedDescription)) }
+            }
+        } catch {
+            for d in daemons { errors.append((d.label, error.localizedDescription)) }
         }
         return errors
     }
@@ -144,11 +203,17 @@ extension StartupController {
             results.append(("error: \(error.localizedDescription)", false))
         }
 
-        let daemon = StartupItem(label: "x", scope: .daemon, plistPath: "/x", program: nil, owner: nil, schedule: [],
-                                 pid: nil, loaded: false, disabled: false, memory: nil)
+        // Daemons: se comprueba solo que se rechaza lo que no se debe tocar (sin pedir contraseña).
+        let appManaged = StartupItem(label: "x.y", scope: .daemon, plistPath: nil, program: nil, owner: nil, schedule: [],
+                                     pid: nil, loaded: false, disabled: false, memory: nil)
         var refused = false
-        do { try c.disable(daemon) } catch StartupError.notAllowed { refused = true } catch {}
-        results.append(("rechaza desactivar un daemon sin el helper", refused))
+        do { try c.disable(appManaged) } catch StartupError.notAllowed { refused = true } catch {}
+        results.append(("rechaza desactivar un daemon registrado por una app (sin plist)", refused))
+        let outside = StartupItem(label: "x.y", scope: .daemon, plistPath: "/tmp/x.y.plist", program: nil, owner: nil, schedule: [],
+                                  pid: nil, loaded: false, disabled: false, memory: nil)
+        var rejected = false
+        do { try c.enable(outside) } catch AdminError.rejected { rejected = true } catch {}
+        results.append(("rechaza un daemon con plist fuera de /Library/LaunchDaemons", rejected))
         return results
     }
 }

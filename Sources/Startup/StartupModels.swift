@@ -9,7 +9,7 @@ public struct StartupItem: Identifiable, Hashable, Sendable {
         case globalAgent
         /// Registrado por una app desde dentro de su bundle (SMAppService). Se gestiona en Ajustes › Ítems de inicio.
         case appManaged
-        /// /Library/LaunchDaemons y servicios de sistema: corren como root. Necesitan el helper (Fase 2).
+        /// /Library/LaunchDaemons y servicios de sistema: corren como root. Cambiarlos pide la contraseña de administrador.
         case daemon
 
         public var title: String {
@@ -26,7 +26,7 @@ public struct StartupItem: Identifiable, Hashable, Sendable {
             case .userAgent: "~/Library/LaunchAgents. Se arrancan al iniciar tu sesión."
             case .globalAgent: "/Library/LaunchAgents. Desactivarlos aquí solo afecta a tu usuario."
             case .appManaged: "La propia app los registra; se activan o desactivan en Ajustes › Ítems de inicio."
-            case .daemon: "/Library/LaunchDaemons. Corren como root desde el arranque; desactivarlos necesita permisos de administrador (Fase 2)."
+            case .daemon: "/Library/LaunchDaemons. Corren como root desde el arranque; desactivarlos o reactivarlos pide tu contraseña de administrador."
             }
         }
 
@@ -38,8 +38,11 @@ public struct StartupItem: Identifiable, Hashable, Sendable {
             }
         }
 
-        /// Solo los agentes con plist propio se pueden desactivar sin contraseña desde MacOSUtil.
-        public var canToggle: Bool { self == .userAgent || self == .globalAgent }
+        /// Se pueden desactivar desde MacOSUtil (si además tienen plist propio). Los daemons piden contraseña.
+        public var canToggle: Bool { self != .appManaged }
+
+        /// Cambiarlo pide la contraseña de administrador.
+        public var needsAdmin: Bool { self == .daemon }
     }
 
     public var id: String { "\(scope.rawValue):\(label)" }
@@ -75,6 +78,9 @@ public struct StartupItem: Identifiable, Hashable, Sendable {
     }
 
     public var isRunning: Bool { pid != nil }
+
+    /// Se puede desactivar desde MacOSUtil: agente o daemon con plist propio (los registrados por apps, no).
+    public var canToggle: Bool { scope.canToggle && plistPath != nil }
 
     /// No se encontró una app instalada a la que pertenezca (el nombre sale solo del identificador).
     /// Suele indicar que la app se borró y su agente se quedó.

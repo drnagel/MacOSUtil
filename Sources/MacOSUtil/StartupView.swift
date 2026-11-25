@@ -1,5 +1,6 @@
 import SwiftUI
 import Startup
+import Privileged
 
 @MainActor
 @Observable
@@ -42,6 +43,8 @@ final class StartupModel {
             do {
                 if enabled { try controller.enable(item) } else { try controller.disable(item) }
                 errorText = nil
+            } catch AdminError.cancelled {
+                errorText = nil   // cancelar el diálogo de contraseña no es un error
             } catch {
                 errorText = error.localizedDescription
             }
@@ -130,7 +133,8 @@ struct StartupView: View {
         .confirmationDialog("¿Reactivar todo?", isPresented: $confirmEnableAll) {
             Button("Reactivar \(model.managedCount)") { model.enableAll() }
         } message: {
-            Text("Los servicios que desactivó MacOSUtil vuelven a arrancar ahora y al iniciar sesión.")
+            Text("Los servicios que desactivó MacOSUtil vuelven a arrancar ahora y al iniciar sesión."
+                 + (model.controller.records.contains { $0.scope.needsAdmin } ? " Para los del sistema, macOS pedirá tu contraseña una vez." : ""))
         }
         .alert(item: $model.banner) { b in
             Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
@@ -191,13 +195,13 @@ struct StartupRow: View {
                 }
                 if busy {
                     ProgressView().controlSize(.small)
-                } else if item.scope.canToggle {
+                } else if item.canToggle {
                     Toggle("", isOn: Binding(
                         get: { !item.disabled },
                         set: { on in if on { model.setEnabled(item, true) } else { confirmDisable = true } }))
                         .toggleStyle(.switch)
                         .labelsHidden()
-                        .help(item.disabled ? "Reactivar" : "Desactivar")
+                        .help((item.disabled ? "Reactivar" : "Desactivar") + (item.scope.needsAdmin ? " (pide tu contraseña)" : ""))
                 }
             }
         }
@@ -205,7 +209,10 @@ struct StartupRow: View {
         .confirmationDialog("¿Desactivar \(item.displayName)?", isPresented: $confirmDisable) {
             Button("Desactivar", role: .destructive) { model.setEnabled(item, false) }
         } message: {
-            Text("Se detiene ahora y no vuelve a arrancar al iniciar sesión. El archivo no se borra: puedes reactivarlo cuando quieras."
+            Text((item.scope.needsAdmin
+                  ? "Se detiene ahora y no vuelve a arrancar con el Mac. macOS te pedirá tu contraseña de administrador."
+                  : "Se detiene ahora y no vuelve a arrancar al iniciar sesión.")
+                 + " El archivo no se borra: puedes reactivarlo cuando quieras."
                  + (item.isOrphan || item.ownerAppMissing ? "" : " La app a la que pertenece puede dejar de funcionar del todo."))
         }
     }

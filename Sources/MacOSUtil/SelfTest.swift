@@ -1,4 +1,5 @@
 import Foundation
+import Privileged
 import TweakEngine
 import AppCatalog
 import Startup
@@ -193,6 +194,45 @@ enum SelfTest {
         let tmpStore = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-startup-\(UUID().uuidString).json")
         defer { try? FileManager.default.removeItem(at: tmpStore) }
         for (msg, good) in StartupController.selfTestCycle(storeURL: tmpStore) { check(good, msg) }
+
+        print("== Privilegios (sin pedir contraseña)")
+        func rejects(_ c: AdminCommand) -> Bool { (try? c.validate()) == nil }
+        func accepts(_ c: AdminCommand) -> Bool { (try? c.validate()) != nil }
+        check(rejects(.daemonDisable(label: "com.apple.mdworker")), "rechaza servicios de Apple")
+        check(rejects(.daemonDisable(label: "a b; rm -rf /")) && rejects(.daemonStop(label: "../x")), "rechaza etiquetas con espacios o rutas")
+        check(rejects(.daemonStart(plistPath: "/tmp/x.plist")) && rejects(.daemonStart(plistPath: "/Library/LaunchDaemons/../x.plist"))
+              && rejects(.daemonStart(plistPath: "/Library/LaunchDaemons/a/x.plist")), "rechaza plists fuera de /Library/LaunchDaemons")
+        check(rejects(.pmset(source: .all, setting: "hibernatemode", value: 0)) && rejects(.pmset(source: .all, setting: "sleep", value: 9999)),
+              "rechaza ajustes de energía no permitidos o fuera de rango")
+        check(rejects(.spotlightIndexing(volume: "/etc", enabled: false)) && rejects(.spotlightIndexing(volume: "/Volumes/../etc", enabled: false))
+              && rejects(.spotlightRebuild(volume: "/Volumes/a/b")), "rechaza rutas que no son volúmenes")
+        check(accepts(.pmset(source: .charger, setting: "powernap", value: 0)) && accepts(.daemonDisable(label: "com.example.helper"))
+              && accepts(.spotlightIndexing(volume: "/", enabled: true)), "acepta comandos válidos")
+        check(AdminRunner.shellQuote("it's") == "'it'\\''s'", "comillas simples escapadas en el shell")
+        check(AdminRunner.appleString("a\"b\\c") == "\"a\\\"b\\\\c\"", "comillas y barras escapadas en AppleScript")
+        let cmds: [AdminCommand] = [.pmset(source: .charger, setting: "powernap", value: 0), .daemonStop(label: "x.y")]
+        let script = AdminRunner.shellScript(cmds)
+        check(script.contains("'/usr/bin/pmset' '-c' 'powernap' '0'") && script.hasSuffix("exit 0"), "script del lote")
+        let parsed = AdminRunner.parse("@@BEGIN 0\r@@END 0 0\r@@BEGIN 1\rBoot-out failed: 3: No such process\r@@END 1 3", commands: cmds)
+        check(parsed.count == 2 && parsed[0].ok && parsed[1].ok && parsed[1].output.contains("No such process"),
+              "lee el resultado de cada comando (detener algo parado no es error)")
+        let sample = "Battery Power:\n lowpowermode 1\n sleep 1\nAC Power:\n Sleep On Power Button 1\n powernap 1\n sleep 0\n"
+        let pv = Power.parse(sample)
+        check(pv[.battery]?["lowpowermode"] == 1 && pv[.charger]?["powernap"] == 1 && pv[.charger]?["Sleep On Power Button"] == 1,
+              "lee pmset -g custom (batería y corriente)")
+        let tmpPower = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-power-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: tmpPower) }
+        let ps = PowerStore(url: tmpPower)
+        try? ps.remember(.charger, "powernap", value: 1)
+        try? ps.remember(.charger, "powernap", value: 0)
+        check(PowerStore(url: tmpPower).original(.charger, "powernap") == 1
+              && ps.restoreCommands() == [.pmset(source: .charger, setting: "powernap", value: 1)], "power.json guarda solo el valor original")
+        check(Spotlight.parseStatus("/:\n\tIndexing enabled. \n").indexing == true
+              && Spotlight.parseStatus("/Volumes/X:\n\tIndexing disabled.\n").indexing == false, "lee mdutil -s")
+        let live = Power.read()
+        check(!live.isEmpty, "pmset en este Mac: \(live.keys.map { $0 == .battery ? "batería" : "corriente" }.sorted().joined(separator: ", "))")
+        let vols = Spotlight.volumes()
+        check(vols.contains { $0.path == "/" }, "volúmenes: \(vols.map { "\($0.name) (\($0.indexing.map { $0 ? "indexa" : "no indexa" } ?? "?"))" }.joined(separator: ", "))")
 
         print("== DiskTree")
         check(DiskTreeLink.Destination.tab("cleanup").url?.absoluteString == "disktree://open?tab=cleanup", "enlace a pestaña")

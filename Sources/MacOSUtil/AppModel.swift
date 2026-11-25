@@ -8,6 +8,7 @@ enum SidebarItem: Hashable {
     case category(String)
     case apps
     case startup
+    case power
     case disk
 }
 
@@ -19,6 +20,7 @@ final class AppModel {
     let engine = TweakEngine()
     let apps = AppsModel()
     let startup = StartupModel()
+    let power = PowerModel()
     private(set) var catalog: Catalog?
     private(set) var loadError: String?
     private(set) var statuses: [String: TweakStatus] = [:]

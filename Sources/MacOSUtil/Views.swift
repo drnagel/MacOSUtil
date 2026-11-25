@@ -23,6 +23,8 @@ struct RootView: View {
                         AppsView()
                     case .startup:
                         StartupView()
+                    case .power:
+                        PowerView()
                     case .disk:
                         DiskView()
                     case nil:
@@ -38,7 +40,7 @@ struct RootView: View {
                     .help("Asistente de configuración: perfiles de ajustes y apps")
             }
             ToolbarItem {
-                Button { app.refresh(); app.apps.refresh(); app.startup.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
+                Button { app.refresh(); app.apps.refresh(); app.startup.refresh(); app.power.refresh() } label: { Label("Volver a comprobar", systemImage: "arrow.clockwise") }
                     .help("Vuelve a leer el estado actual de cada ajuste (⌘R)")
             }
             ToolbarItem {
@@ -88,6 +90,7 @@ struct Sidebar: View {
                 Label("Arranque", systemImage: "power")
                     .badge(app.startup.running.count)
                     .tag(SidebarItem.startup)
+                Label("Energía", systemImage: "bolt").tag(SidebarItem.power)
                 Label("Espacio en disco", systemImage: "internaldrive").tag(SidebarItem.disk)
             }
         }
@@ -265,6 +268,7 @@ struct DiskView: View {
     @State private var volume = VolumeInfo.current()
     @State private var diskTree = DiskTreeLink.appURL
     @State private var links = DiskTreeLink.supportsLinks()
+    @State private var spotlight = SpotlightModel()
 
     private static let shortcuts: [(title: String, detail: String, icon: String, tab: String)] = [
         ("Qué ocupa espacio", "Los archivos más grandes del Mac", "doc.badge.ellipsis", "large"),
@@ -293,6 +297,7 @@ struct DiskView: View {
                 ProgressView(value: volume.usedFraction)
                     .tint(volume.usedFraction > 0.9 ? .red : .accentColor)
             }
+            SpotlightSection(model: spotlight)
             if diskTree == nil {
                 Section("Analizar y liberar espacio") {
                     Text("DiskTree no está instalada.")
