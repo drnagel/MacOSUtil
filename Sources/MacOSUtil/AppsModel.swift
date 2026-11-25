@@ -125,6 +125,43 @@ final class AppsModel {
         runJobs([("Desinstalando \(a.name)", { await Homebrew.uninstall(token, onLine: $0) })], note: nil)
     }
 
+    // MARK: Pasar a Homebrew
+
+    /// Plan para pasar a Homebrew una app instalada a mano (nil si no aplica: App Store, sin info de brew…).
+    func adoptPlan(_ a: AppEntry) -> Adopt.Plan? {
+        guard brewInstalled, let token = a.cask, case .manual(let path) = status(a), let i = info[token] else { return nil }
+        return Adopt.plan(token: token, path: path, info: i)
+    }
+
+    /// Apps del catálogo instaladas a mano que se pueden pasar a Homebrew.
+    var adoptable: [AppEntry] { (catalog?.allApps ?? []).filter { adoptPlan($0) != nil } }
+
+    /// La app está abierta ahora (sustituirla con ella abierta puede dejarla a medias).
+    func isOpen(_ a: AppEntry) -> Bool {
+        guard case .manual(let path) = status(a) else { return false }
+        return NSWorkspace.shared.runningApplications.contains { $0.bundleURL?.path == path }
+    }
+
+    func adopt(_ apps: [AppEntry]) {
+        guard !isRunning else { return }
+        let plans = apps.compactMap { a in adoptPlan(a).map { (a, $0) } }
+        let terminal = plans.filter { $0.1.needsTerminal }
+        let direct = plans.filter { !$0.1.needsTerminal }
+        if !terminal.isEmpty {
+            Homebrew.openInTerminal(terminal.map { $0.1.arguments },
+                                    title: "MacOSUtil: pasando a Homebrew \(terminal.map(\.0.name).joined(separator: ", ")) (pide contraseña)")
+        }
+        let note = terminal.isEmpty ? nil
+            : "\(terminal.map(\.0.name).joined(separator: ", ")) se pasa a Homebrew en Terminal porque su instalador pide tu contraseña. Cuando termine, pulsa «Volver a comprobar»."
+        guard !direct.isEmpty else {
+            if let note { banner = .init(text: note, isError: false) }
+            return
+        }
+        runJobs(direct.map { a, plan in
+            ("\(plan.mode == .adopt ? "Adoptando" : "Pasando a Homebrew") \(a.name)", { await Homebrew.adopt(plan, onLine: $0) })
+        }, note: note)
+    }
+
     func openAppStore(_ a: AppEntry) {
         if let url = a.appStoreURL { NSWorkspace.shared.open(url) }
     }

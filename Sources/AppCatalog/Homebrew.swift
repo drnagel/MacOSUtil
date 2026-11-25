@@ -161,6 +161,8 @@ public enum Homebrew {
 
     // MARK: Terminal
 
+    static func shellQuote(_ s: String) -> String { "'" + s.replacingOccurrences(of: "'", with: "'\\''") + "'" }
+
     /// Los casks que instalan un .pkg piden la contraseña de administrador, y eso solo se puede escribir
     /// en una terminal. Genera un script `.command` y lo abre en Terminal.
     @discardableResult
@@ -172,10 +174,11 @@ public enum Homebrew {
         let url = dir.appendingPathComponent("brew-\(UUID().uuidString.prefix(8)).command")
         var lines = ["#!/bin/zsh", "clear", "echo '\(title.replacingOccurrences(of: "'", with: ""))'", "echo"]
         for args in commands {
-            // Todos los argumentos son tokens validados o flags fijos: no hay nada que escapar.
+            // Solo tokens validados, subcomandos fijos y opciones; aun así cada argumento va entre comillas simples
+            // (p. ej. `--appdir=` lleva una ruta que puede tener espacios).
             guard args.allSatisfy({ isValidToken($0) || $0.hasPrefix("--") || ["install", "upgrade", "uninstall"].contains($0) })
             else { return false }
-            lines.append("\(brew) \(args.joined(separator: " "))")
+            lines.append(([brew] + args).map(shellQuote).joined(separator: " "))
         }
         lines += ["echo", "echo 'Terminado. Vuelve a MacOSUtil y pulsa «Volver a comprobar».'", "read -k1 '?Pulsa una tecla para cerrar…'",
                   "rm -f \"$0\""]

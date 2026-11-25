@@ -3,6 +3,7 @@ import AppCatalog
 
 struct AppsView: View {
     @Environment(AppModel.self) private var root
+    @State private var confirmAdoptAll = false
     private var model: AppsModel { root.apps }
 
     var body: some View {
@@ -32,6 +33,17 @@ struct AppsView: View {
                     }
                 }
             }
+            if !model.adoptable.isEmpty {
+                Section {
+                    HStack {
+                        Label("\(model.adoptable.count) instaladas fuera de Homebrew", systemImage: "shippingbox")
+                        Spacer()
+                        Button("Pasar todas a Homebrew") { confirmAdoptAll = true }.disabled(model.isRunning)
+                    }
+                } footer: {
+                    Text("Así se actualizan desde aquí con «Actualizar», como las demás. Tus ajustes y datos se conservan.").footerStyle()
+                }
+            }
             ForEach(model.catalog?.categories ?? []) { c in
                 Section {
                     ForEach(c.apps) { AppRow(app: $0) }
@@ -54,6 +66,33 @@ struct AppsView: View {
             Alert(title: Text(b.isError ? "Hubo problemas" : "Listo"), message: Text(b.text))
         }
         .onAppear { if model.statuses.isEmpty { model.refresh() } }
+        .confirmationDialog("¿Pasar \(model.adoptable.count) apps a Homebrew?", isPresented: $confirmAdoptAll) {
+            Button("Pasar \(model.adoptable.count) a Homebrew") { model.adopt(model.adoptable) }
+        } message: {
+            Text(AdoptText.summary(model.adoptable, model: model))
+        }
+    }
+}
+
+/// Textos de confirmación para pasar apps a Homebrew.
+@MainActor
+enum AdoptText {
+    static func line(_ a: AppEntry, _ plan: Adopt.Plan, open: Bool) -> String {
+        var t: String
+        switch plan.mode {
+        case .adopt:
+            t = "\(a.name): tu copia (\(plan.localVersion ?? "?")) es la misma que la de Homebrew; se adopta sin descargar nada."
+        case .replace:
+            t = "\(a.name): se descarga la \(plan.caskVersion) y sustituye a tu copia (\(plan.localVersion ?? "versión desconocida"))."
+        }
+        if plan.needsTerminal { t += " Se hace en Terminal porque pide tu contraseña." }
+        if open { t += " Está abierta: ciérrala antes." }
+        return t
+    }
+
+    static func summary(_ apps: [AppEntry], model: AppsModel) -> String {
+        let lines = apps.compactMap { a in model.adoptPlan(a).map { "• " + line(a, $0, open: model.isOpen(a)) } }
+        return lines.joined(separator: "\n") + "\n\nTus ajustes y datos de ~/Library se conservan."
     }
 }
 
@@ -61,6 +100,7 @@ struct AppRow: View {
     @Environment(AppModel.self) private var root
     let app: AppEntry
     @State private var confirmUninstall = false
+    @State private var confirmAdopt = false
 
     var body: some View {
         let model = root.apps
@@ -90,6 +130,13 @@ struct AppRow: View {
         .padding(.vertical, 3)
         .contentShape(Rectangle())
         .onTapGesture { model.toggle(app) }
+        .confirmationDialog("¿Pasar \(app.name) a Homebrew?", isPresented: $confirmAdopt) {
+            Button(model.adoptPlan(app)?.mode == .adopt ? "Adoptar" : "Sustituir por la de Homebrew") { model.adopt([app]) }
+        } message: {
+            if let plan = model.adoptPlan(app) {
+                Text(AdoptText.line(app, plan, open: model.isOpen(app)) + " Tus ajustes y datos de ~/Library se conservan.")
+            }
+        }
         .confirmationDialog("¿Desinstalar \(app.name)?", isPresented: $confirmUninstall) {
             Button("Desinstalar", role: .destructive) { model.uninstall(app) }
         } message: {
@@ -109,6 +156,9 @@ struct AppRow: View {
                 Button("Desinstalar") { confirmUninstall = true }.disabled(model.isRunning)
             case .manual(let path):
                 Button("Mostrar") { model.reveal(path) }
+                if model.adoptPlan(app) != nil {
+                    Button("Pasar a Homebrew") { confirmAdopt = true }.disabled(model.isRunning)
+                }
             case .notInstalled where app.appStore != nil:
                 Button("Ver en App Store") { model.openAppStore(app) }
             default:

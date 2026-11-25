@@ -75,6 +75,11 @@ public struct CaskInfo: Sendable, Equatable {
     public let appPaths: [String]
     /// Instala un .pkg o un instalador: necesita contraseña de administrador.
     public let needsAdmin: Bool
+
+    public init(token: String, version: String, installed: String?, outdated: Bool, appPaths: [String], needsAdmin: Bool) {
+        self.token = token; self.version = version; self.installed = installed
+        self.outdated = outdated; self.appPaths = appPaths; self.needsAdmin = needsAdmin
+    }
 }
 
 public enum AppCatalogError: LocalizedError {

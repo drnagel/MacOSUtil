@@ -127,7 +127,11 @@ enum SelfTest {
                     let st = Homebrew.status(of: a, info: info)
                     let mark = switch st {
                     case .brew(let v, let outdated): "brew \(v)\(outdated ? " (desactualizada)" : "")"
-                    case .manual: "instalada fuera de brew"
+                    case .manual(let path):
+                        "instalada fuera de brew" + (a.cask.flatMap { t in info[t].flatMap { Adopt.plan(token: t, path: path, info: $0) } }.map {
+                            $0.mode == .adopt ? " → se puede adoptar" : " → pasar a Homebrew sustituye \($0.localVersion ?? "?") por \($0.caskVersion)"
+                                + ($0.appDir != nil ? " (en \(($0.appDir! as NSString).abbreviatingWithTildeInPath))" : "")
+                        } ?? "")
                     case .notInstalled: "—"
                     case .unavailable: "NO DISPONIBLE"
                     case .unknown: "?"
@@ -140,6 +144,25 @@ enum SelfTest {
             }
         } catch {
             check(false, error.localizedDescription)
+        }
+
+        // 4a. Pasar a Homebrew (sin ejecutar brew)
+        do {
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("macosutil-adopt-\(UUID().uuidString)/Mi App.app")
+            defer { try? FileManager.default.removeItem(at: tmp.deletingLastPathComponent()) }
+            try? FileManager.default.createDirectory(at: tmp.appendingPathComponent("Contents"), withIntermediateDirectories: true)
+            (["CFBundleShortVersionString": "1.2.3"] as NSDictionary).write(to: tmp.appendingPathComponent("Contents/Info.plist"), atomically: true)
+            func info(_ v: String, admin: Bool = false) -> CaskInfo {
+                CaskInfo(token: "mi-app", version: v, installed: nil, outdated: false, appPaths: [], needsAdmin: admin)
+            }
+            let same = Adopt.plan(token: "mi-app", path: tmp.path, info: info("1.2.3,456"))
+            check(same?.mode == .adopt && same?.arguments.prefix(3) == ["install", "--cask", "--adopt"], "misma versión (ignora el build tras la coma) → --adopt")
+            let newer = Adopt.plan(token: "mi-app", path: tmp.path, info: info("2.0"))
+            check(newer?.mode == .replace && newer?.arguments.contains("--force") == true && newer?.localVersion == "1.2.3", "versión distinta → --force")
+            check(newer?.appDir == tmp.deletingLastPathComponent().path && newer?.arguments.contains("--appdir=\(tmp.deletingLastPathComponent().path)") == true,
+                  "fuera de /Applications → --appdir con su carpeta")
+            check(Adopt.plan(token: "mi-app", path: tmp.path, info: info("2.0", admin: true))?.needsTerminal == true, "instalador .pkg → en Terminal")
+            check(Adopt.plan(token: "Mal Token", path: tmp.path, info: info("2.0")) == nil, "rechaza tokens no válidos")
         }
 
         // 4b. Perfiles y archivo de configuración
