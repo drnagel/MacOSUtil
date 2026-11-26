@@ -294,6 +294,16 @@ enum SelfTest {
         check(!healthLive.isEmpty && Set(healthLive.map(\.id)).count == healthLive.count, "comprobaciones en este Mac: \(healthLive.count) en \(String(format: "%.1f", Date().timeIntervalSince(t0))) s")
         for c in healthLive where c.status >= .warning { print("    ⚠︎ \(c.title): \(c.detail)") }
 
+        print("== Widget de la barra de menús")
+        let sampler = SystemSampler()
+        _ = sampler.sample()
+        Thread.sleep(forTimeInterval: 0.5)
+        let snap = sampler.sample()
+        check(snap.cpu.map { (0...1).contains($0) } ?? false, "CPU: \(Int(((snap.cpu ?? 0) * 100).rounded())) % (segunda lectura)")
+        check(snap.memoryUsed > 0 && snap.memoryUsed <= snap.memoryTotal,
+              "memoria: \(ByteCountFormatter.string(fromByteCount: snap.memoryUsed, countStyle: .memory)) de \(ByteCountFormatter.string(fromByteCount: snap.memoryTotal, countStyle: .memory)) · presión \(snap.pressure.rawValue)")
+        check(snap.diskTotal > 0 && snap.diskFree > 0 && snap.diskFree <= snap.diskTotal && snap.uptime > 0, "disco y tiempo encendido")
+
         print("== Idiomas y catálogo firmado")
         check(CatalogLanguage.pick(["en": "Hello", "es": "Hola"]) == (CatalogLanguage.current == "es" ? "Hola" : "Hello")
               && CatalogLanguage.pick(["es": "Solo"]) == "Solo", "elige el idioma de la app, con inglés y luego cualquiera de reserva (ahora: \(CatalogLanguage.current))")

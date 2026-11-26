@@ -5,6 +5,10 @@ import AppKit
 struct MacOSUtilApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var app: AppModel
+    @State private var monitor = MonitorModel.shared
+    /// Widget de la barra de menús (CPU, memoria y disco). Activado por defecto.
+    @AppStorage("showMenuBarWidget") private var showWidget = true
+    @AppStorage("menuBarLabel") private var labelMode: MenuBarLabelMode = .cpuAndMemory
 
     init() {
         // Modo diagnóstico sin interfaz: `MacOSUtil --selftest`
@@ -41,8 +45,18 @@ struct MacOSUtilApp: App {
                 Button("Buscar actualizaciones del catálogo…") { app.checkCatalogUpdate() }
                 Divider()
                 Button("Abrir DiskTree") { DiskTreeLink.open() }.disabled(DiskTreeLink.appURL == nil)
+                Divider()
+                Toggle("Mostrar el widget en la barra de menús", isOn: $showWidget)
             }
         }
+
+        MenuBarExtra(isInserted: $showWidget) {
+            MenuBarPanel(monitor: monitor, mode: $labelMode, isShown: $showWidget)
+                .environment(app)
+        } label: {
+            MenuBarLabel(monitor: monitor, mode: labelMode)
+        }
+        .menuBarExtraStyle(.window)
     }
 }
 
@@ -50,7 +64,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+        Task { @MainActor in MonitorModel.shared.start() }
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    /// Con el widget en la barra de menús, cerrar la ventana no cierra la app: se vuelve a abrir desde el widget.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        !(UserDefaults.standard.object(forKey: "showMenuBarWidget") as? Bool ?? true)
+    }
 }

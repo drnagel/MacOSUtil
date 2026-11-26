@@ -122,6 +122,12 @@
           "name": "The Unarchiver",
           "cask": "the-unarchiver",
           "description": { "en": "Extracts virtually any archive format.", "es": "Descomprime prácticamente cualquier formato de archivo." }
+        },
+        {
+          "name": "Stremio",
+          "description": { "en": "A media center that brings together movies, series and channels from its add-ons in one place.", "es": "Centro multimedia que reúne películas, series y canales de sus complementos en un solo sitio." },
+          "cask": "stremio",
+          "homepage": "https://www.stremio.com"
         }
       ]
     },
@@ -165,6 +171,13 @@
           "appStore": "937984704",
           "appName": "Amphetamine.app",
           "description": { "en": "Keeps your Mac awake based on rules (open apps, downloads, external display…). App Store only.", "es": "Mantiene el Mac despierto con reglas (apps abiertas, descargas, pantalla externa…). Solo en App Store." }
+        },
+        {
+          "name": "Blackmagic Disk Speed Test",
+          "description": { "en": "Measures the read and write speed of your disks. Free, App Store only.", "es": "Mide la velocidad de lectura y escritura de tus discos. Gratis, solo en App Store." },
+          "appStore": "425264550",
+          "appName": "Blackmagic Disk Speed Test.app",
+          "homepage": "https://www.blackmagicdesign.com"
         }
       ]
     },
@@ -214,6 +227,12 @@
           "name": "OrbStack",
           "cask": "orbstack",
           "description": { "en": "Docker and lightweight Linux machines; a fast alternative to Docker Desktop.", "es": "Docker y máquinas Linux ligeras; alternativa rápida a Docker Desktop." }
+        },
+        {
+          "name": "Warp",
+          "description": { "en": "A modern terminal with command blocks, command search and built-in AI.", "es": "Terminal moderna con bloques de comandos, búsqueda de comandos e IA integrada." },
+          "cask": "warp",
+          "homepage": "https://www.warp.dev"
         }
       ]
     }
