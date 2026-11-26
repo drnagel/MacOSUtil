@@ -128,6 +128,12 @@
           "description": { "en": "A media center that brings together movies, series and channels from its add-ons in one place.", "es": "Centro multimedia que reúne películas, series y canales de sus complementos en un solo sitio." },
           "cask": "stremio",
           "homepage": "https://www.stremio.com"
+        },
+        {
+          "name": "GameHub",
+          "description": { "en": "Runs Windows and Steam games on Apple silicon Macs through a compatibility layer.", "es": "Ejecuta juegos de Windows y de Steam en Macs con Apple silicon mediante una capa de compatibilidad." },
+          "cask": "gamehub",
+          "homepage": "https://www.gamemac.com/en"
         }
       ]
     },
